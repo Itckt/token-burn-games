@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <meta name="theme-color" content="#f9f7ed">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23254236'/%3E%3Cpath d='M6 29l10-15 5 8 4-6 9 13z' fill='none' stroke='%23f6edd4' stroke-width='2'/%3E%3Ccircle cx='27' cy='10' r='3' fill='%23e5ac72'/%3E%3C/svg%3E">
+  <title>Campus Atlas · Kowloon Tong</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="src/math.js"></script>
+  <script defer src="src/mesh.js"></script>
+  <script defer src="src/terrain.js"></script>
+  <script defer src="src/architecture.js"></script>
+  <script defer src="src/moon-pool.js"></script>
+  <script defer src="src/places.js"></script>
+  <script defer src="src/campus.js"></script>
+  <script defer src="src/collision.js"></script>
+  <script defer src="src/weather.js"></script>
+  <script defer src="src/simulation.js"></script>
+  <script defer src="src/navigation.js"></script>
+  <script defer src="src/walks.js"></script>
+  <script defer src="src/notebook.js"></script>
+  <script defer src="src/photo-studies.js"></script>
+  <script defer src="src/map.js"></script>
+  <script defer src="src/guide-sections.js"></script>
+  <script defer src="src/field-guide.js"></script>
+  <script defer src="src/postcard.js"></script>
+  <script defer src="src/field-camera.js"></script>
+  <script defer src="src/soundscape.js"></script>
+  <script defer src="src/renderer.js"></script>
+  <script defer src="src/app.js"></script>
+</head>
+<body>
+  <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="pin" viewBox="0 0 24 24"><path d="M19.5 9.7c0 5.5-7.5 12-7.5 12s-7.5-6.5-7.5-12a7.5 7.5 0 1 1 15 0Z"/><circle cx="12" cy="9.5" r="2.4"/></symbol>
+    <symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.1"/><path d="M12 2v2.3m0 15.4V22M2 12h2.3m15.4 0H22M5 5l1.7 1.7m10.6 10.6L19 19M5 19l1.7-1.7M17.3 6.7L19 5"/></symbol>
+    <symbol id="moon" viewBox="0 0 24 24"><path d="M20.6 14.6A9.1 9.1 0 0 1 9.4 3.4a9.1 9.1 0 1 0 11.2 11.2Z"/></symbol>
+    <symbol id="map-icon" viewBox="0 0 24 24"><path d="m2.5 5.3 6-2.2 7 2.4 6-2.4v15.7l-6 2.2-7-2.4-6 2.4zm6-2.2v15.5m7-13.1V21"/></symbol>
+    <symbol id="expand" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6-6.5 6.5M10 20H4v-6m0 6 6.5-6.5"/></symbol>
+    <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+    <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="walk-icon" viewBox="0 0 24 24"><circle cx="14.2" cy="4" r="1.8"/><path d="m7 12.4 2.1-3.3 3.6-1.3 2.1 4.4 3 1.2m-5.4-4.7-1.9 7 3.5 2.5 1.2 4m-4.6-7-2.2 4.6-2.5 2.2"/></symbol>
+    <symbol id="mouse" viewBox="0 0 24 24"><rect x="5.5" y="2" width="13" height="20" rx="6.5"/><path d="M12 5v4"/></symbol>
+    <symbol id="reset-icon" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1.5 7.3M4 4v6h6"/></symbol>
+    <symbol id="book" viewBox="0 0 24 24"><path d="M12 6.2C9.7 4.3 6.5 3.6 2.5 4.5v14.8c3.4-.9 6.8-.6 9.5 1.4 2.7-2 6.1-2.3 9.5-1.4V4.5c-4-.9-7.2-.2-9.5 1.7Zm0 0v14.5"/></symbol>
+    <symbol id="pointer" viewBox="0 0 24 24"><path d="m5 3 14.4 10.1-7.1 1.2-3.6 6.2z"/></symbol>
+    <symbol id="enter" viewBox="0 0 24 24"><path d="M20 5v8H5m5-5-5 5 5 5"/></symbol>
+    <symbol id="chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="compass-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="m15.8 7.6-2.2 6.1-5.4 2.7 2.1-6.1z"/></symbol>
+    <symbol id="rain-icon" viewBox="0 0 24 24"><path d="M6 14.5a4 4 0 0 1-.2-8 5.9 5.9 0 0 1 11.2.7 3.7 3.7 0 0 1 .1 7.3H6ZM7.8 17l-1.2 2.5M12.2 17.8 11 20.3m5.8-3.3-1.2 2.5"/></symbol>
+    <symbol id="stamp-icon" viewBox="0 0 24 24"><path d="M5 15.5h14l1 3H4l1-3Zm3 0v-2c0-1.9 2.5-3 2.5-4.4 0-1.2-1-1.7-1-3.2a2.5 2.5 0 0 1 5 0c0 1.5-1 2-1 3.2 0 1.4 2.5 2.5 2.5 4.4v2M5.5 21h13"/></symbol>
+    <symbol id="turn-icon" viewBox="0 0 24 24"><path d="m12 3 7 16-7-3-7 3Z"/></symbol>
+    <symbol id="camera-icon" viewBox="0 0 24 24"><path d="M3 7.5h4l1.7-3h6.6l1.7 3h4v12H3z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="sound-icon" viewBox="0 0 24 24"><path d="M3 9h4l5-4v14l-5-4H3zM16 8c2.6 2.2 2.6 5.8 0 8m3-11c4.4 3.8 4.4 10.2 0 14"/></symbol>
+  </svg>
+  <header class="masthead">
+    <div class="identity">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <rect width="40" height="40" rx="8" fill="#294b3b"/>
+        <g fill="none" stroke="#f4ecd5" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M6.5 27.8 16 13.3l5.4 8.5 4.4-6.3 8 12.3H6.5Z"/><path d="m11 27.8 5.3-8 5.2 8m1.1 0 3.2-5 3.2 5M7 31.8h26"/></g>
+        <circle cx="26.4" cy="9.6" r="2.6" fill="#e6b475"/>
+      </svg>
+      <h1>Campus Atlas</h1>
+      <span class="header-place"><svg class="icon"><use href="#pin"/></svg>Kowloon Tong, Hong Kong</span>
+    </div>
+    <div class="header-tools">
+      <div class="light-switch" role="group" aria-label="Time of day">
+        <button id="day" type="button" aria-pressed="true" title="Daylight (N to toggle)"><svg class="icon"><use href="#sun"/></svg>Day</button>
+        <button id="night" type="button" aria-pressed="false" title="Nightfall (N to toggle)"><svg class="icon"><use href="#moon"/></svg>Night</button>
+      </div>
+      <button id="weather" class="weather-switch" type="button" aria-label="Rain shower" aria-pressed="false" title="Toggle rain shower (R)"><svg class="icon"><use href="#rain-icon"/></svg><span>Shower</span></button>
+      <button id="help" class="help-button" type="button" aria-label="Walking controls" title="Walking controls (?)">?</button>
+    </div>
+  </header>
+  <main id="viewport" aria-label="Interactive campus walk-through">
+    <canvas id="campus" tabindex="0" aria-label="Three-dimensional campus. Use W A S D to walk and the arrow keys or mouse to look."></canvas>
+    <div class="compass" title="Camera bearing">
+      <svg class="compass-dial" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14"/><g id="needle"><path d="m16 4.7 3.5 11.8-3.5-1.3-3.5 1.3Z" fill="#a15334"/><path d="m16 27.3-3.5-11.8 3.5 1.3 3.5-1.3Z" fill="#73847a"/></g></svg>
+      <span id="direction">N</span><span id="bearing">002°</span>
+    </div>
+    <div class="trail-tools">
+      <div id="route-card" hidden>
+        <span class="route-dial"><svg id="route-arrow" class="icon" aria-hidden="true"><use href="#turn-icon"/></svg></span>
+        <span class="route-copy"><small id="walk-progress" hidden></small><strong id="route-name"></strong><span id="route-cue"></span></span>
+        <button id="end-route" type="button" aria-label="End walking route" title="End route (X)"><svg class="icon"><use href="#close"/></svg></button>
+        <div id="stop-detail" hidden><p id="stop-note"></p><button id="next-stop" type="button"><span id="next-label">Next stop</span> <kbd>F</kbd></button></div>
+      </div>
+      <button id="stamp" type="button" hidden><svg class="icon"><use href="#stamp-icon"/></svg>Stamp notebook <kbd>E</kbd></button>
+      <button id="lookout-camera" type="button" hidden><svg class="icon"><use href="#camera-icon"/></svg>Frame a study <kbd>C</kbd></button>
+      <span id="cover" hidden><svg class="icon"><use href="#rain-icon"/></svg>Under cover</span>
+    </div>
+    <button id="mini-map-button" type="button" aria-label="Expand campus map and choose a place" aria-haspopup="dialog">
+      <span class="map-heading"><span><svg class="icon"><use href="#map-icon"/></svg>Campus map</span><svg class="icon expand-icon"><use href="#expand"/></svg></span>
+      <canvas id="mini-map" width="400" height="280" aria-hidden="true"></canvas>
+    </button>
+    <div id="reticle" aria-hidden="true"></div>
+    <article class="location-card" aria-label="Current location">
+      <div class="card-meta"><span><i></i>Current location</span><span id="place-index">01 / 07</span></div>
+      <h2 id="place-title">Banyan Court</h2>
+      <p id="place-note">A sunlit promenade of spreading banyans, pale stone and brick.</p>
+      <button id="guide" class="guide-link" type="button" aria-haspopup="dialog"><span><svg class="icon"><use href="#book"/></svg>Field guide</span><svg class="icon"><use href="#arrow"/></svg></button>
+    </article>
+    <div id="touch-pad" aria-label="Walk directions">
+      <button data-key="KeyW" aria-label="Walk forward">↑</button><button data-key="KeyA" aria-label="Step left">←</button><button data-key="KeyS" aria-label="Walk backward">↓</button><button data-key="KeyD" aria-label="Step right">→</button>
+    </div>
+    <button id="walk" class="primary walk-button" type="button">
+      <svg class="icon"><use href="#walk-icon"/></svg><span id="walk-label">Start walking</span><kbd id="walk-key" aria-hidden="true"><svg class="icon"><use href="#enter"/></svg><span>Esc</span></kbd>
+    </button>
+    <section id="viewfinder" aria-label="Field camera controls" hidden>
+      <div class="frame-grid" aria-hidden="true"></div>
+      <div class="camera-note"><svg class="icon" aria-hidden="true"><use href="#camera-icon"/></svg><span>Field camera</span><small>Drag or use arrow keys to frame</small></div>
+      <div id="study-hint" role="status" hidden><strong id="study-name"></strong><span id="study-cue"></span></div>
+      <button id="camera-close" class="camera-exit" type="button" aria-label="Close field camera" title="Close camera (Esc)"><svg class="icon"><use href="#close"/></svg></button>
+      <div class="camera-controls">
+        <div class="lens-controls" role="group" aria-label="Lens magnification">
+          <button id="lens-out" type="button" disabled aria-label="Zoom out" title="Zoom out (−)">−</button>
+          <output id="lens-value" aria-label="Magnification">1×</output>
+          <button id="lens-in" type="button" aria-label="Zoom in" title="Zoom in (+)">+</button>
+        </div>
+        <button id="shutter" type="button" title="Take a postcard (Space)"><i aria-hidden="true"></i>Take postcard</button>
+      </div>
+    </section>
+    <div id="toast" role="status"></div>
+    <section id="unavailable" class="error-panel" role="alert" hidden>
+      <svg class="icon"><use href="#compass-icon"/></svg><h2 id="error-title">WebGL is unavailable</h2>
+      <p id="error-message">This campus needs WebGL to draw its 3D view. Enable graphics acceleration in your browser or open index.html in another WebGL-capable browser.</p>
+      <button type="button" id="retry" class="primary">Try again</button>
+    </section>
+    <noscript><div class="no-js">Enable JavaScript to explore the 3D campus.</div></noscript>
+  </main>
+  <footer class="control-strip">
+    <div class="desktop-hints" aria-label="Controls">
+      <span class="hint"><span class="key-group"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>Move</span>
+      <span class="hint"><svg class="icon"><use href="#mouse"/></svg>Look around</span>
+      <span class="hint"><kbd>Shift</kbd>Walk faster</span>
+      <span class="hint"><kbd>Esc</kbd>Release mouse</span>
+    </div>
+    <span class="touch-hint">Drag to look <span>·</span> Direction pad to move</span>
+    <div class="camera-hints" aria-label="Camera shortcuts"><span class="hint"><kbd>Space</kbd>Shutter</span><span class="hint"><kbd>Esc</kbd>Put away</span></div>
+    <div class="footer-tools">
+      <button id="sound" class="tool-button" type="button" aria-label="Campus sound" aria-pressed="false" title="Campus sound (V)"><svg class="icon"><use href="#sound-icon"/></svg><span>Sound</span></button>
+      <button id="camera" class="tool-button" type="button" aria-label="Field camera" aria-pressed="false" title="Field camera (C)"><svg class="icon"><use href="#camera-icon"/></svg><span>Field camera</span></button>
+      <button id="reset" class="reset-button" type="button"><svg class="icon"><use href="#reset-icon"/></svg>Reset view</button>
+    </div>
+  </footer>
+  <dialog id="guide-dialog" aria-labelledby="guide-title">
+    <div class="dialog-head"><div><h2 id="guide-title">Field guide</h2><p id="stamp-count">0 of 7 stamps</p><p id="study-count" hidden></p></div><button class="close-button" aria-label="Close field guide"><svg class="icon"><use href="#close"/></svg></button></div>
+    <div class="guide-tabs" role="tablist" aria-label="Field guide sections">
+      <button id="tab-places" type="button" role="tab" aria-selected="true" aria-controls="page-places">Places</button>
+      <button id="tab-walks" type="button" role="tab" aria-selected="false" aria-controls="page-walks" tabindex="-1">Guided walks</button>
+      <button id="tab-studies" type="button" role="tab" aria-selected="false" aria-controls="page-studies" tabindex="-1">Photo studies</button>
+    </div>
+    <section id="page-places" role="tabpanel" aria-labelledby="tab-places">
+    <div class="guide-body"><div class="guide-list" aria-label="Campus places"></div><div class="guide-map-wrap"><canvas id="guide-map" aria-label="Map of the campus places and the walking route to the selected stamp press"></canvas></div></div>
+    <div class="guide-detail">
+      <div class="place-detail"><h3 id="selected-name">Banyan Court</h3><p id="selected-note"></p></div>
+      <div class="impression"><canvas id="stamp-art" width="120" height="120" aria-hidden="true"></canvas><div><h4 id="stamp-title"></h4><p id="field-note"></p></div></div>
+    </div>
+    <div class="guide-actions">
+      <button id="follow-route" class="primary" type="button"><svg class="icon"><use href="#compass-icon"/></svg><span id="route-action">Route to press</span><span id="route-distance"></span></button>
+      <button id="travel" class="secondary" type="button">Walk from here<svg class="icon"><use href="#arrow"/></svg></button>
+    </div>
+    </section>
+    <section id="page-walks" role="tabpanel" aria-labelledby="tab-walks" hidden>
+      <div id="walk-choices" role="group" aria-label="Choose a guided walk"></div>
+      <div class="walk-preview">
+        <div><h3 id="itinerary-name"></h3><p id="itinerary-intro"></p><ol id="itinerary-stops"></ol></div>
+        <div class="guide-map-wrap"><canvas id="walks-map" aria-label="Walking directions with the stops numbered in order"></canvas></div>
+      </div>
+      <div class="guide-actions"><button id="take-walk" type="button" class="primary">Start guided walk</button><span id="walk-length"></span></div>
+    </section>
+    <section id="page-studies" role="tabpanel" aria-labelledby="tab-studies" hidden>
+      <p class="study-intro">Look for a brass viewfinder tile. Open the field camera there and take a postcard to record the study.</p>
+      <div id="study-list"></div>
+    </section>
+  </dialog>
+  <dialog id="print-dialog" aria-labelledby="print-title">
+    <div class="dialog-head"><h2 id="print-title">Your postcard</h2><button class="close-button" aria-label="Close postcard"><svg class="icon"><use href="#close"/></svg></button></div>
+    <div class="print-mat"><canvas id="print-preview" role="img" aria-label="Postcard preview"></canvas></div>
+    <p id="print-study" role="status" hidden></p>
+    <div class="print-actions"><button id="retake" class="secondary" type="button">Retake</button><span id="print-status" role="status"></span><a id="print-download" class="primary" download hidden>Save PNG</a></div>
+  </dialog>
+  <dialog id="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-head"><h2 id="help-title">Walking controls</h2><button class="close-button" aria-label="Close controls"><svg class="icon"><use href="#close"/></svg></button></div>
+    <p class="help-intro">Select Start walking to capture your mouse. You can also drag the scene to look around.</p>
+    <dl class="control-list">
+      <div><dt>Walk</dt><dd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dd></div>
+      <div><dt>Look around</dt><dd>Mouse or arrow keys</dd></div>
+      <div><dt>Walk faster</dt><dd><kbd>Shift</kbd> + movement</dd></div>
+      <div><dt>Start walking</dt><dd><kbd>Enter</kbd></dd></div>
+      <div><dt>Release mouse or close panel</dt><dd><kbd>Esc</kbd></dd></div>
+      <div><dt>Day / night</dt><dd><kbd>N</kbd></dd></div>
+      <div><dt>Rain shower</dt><dd><kbd>R</kbd></dd></div>
+      <div><dt>Field guide</dt><dd><kbd>M</kbd></dd></div>
+      <div><dt>Route to a stamp press</dt><dd>Choose it in the field guide</dd></div>
+      <div><dt>End walking route</dt><dd><kbd>X</kbd></dd></div>
+      <div><dt>Start a guided walk</dt><dd>Field guide → Guided walks</dd></div>
+      <div><dt>Continue from a guided stop</dt><dd><kbd>F</kbd> or Next stop</dd></div>
+      <div><dt>Stamp notebook at a press</dt><dd><kbd>E</kbd></dd></div>
+      <div><dt>Campus sound on / off</dt><dd><kbd>V</kbd></dd></div>
+      <div><dt>Open or put away the camera</dt><dd><kbd>C</kbd></dd></div>
+      <div><dt>Frame a postcard</dt><dd>Drag or arrow keys</dd></div>
+      <div><dt>Zoom / take postcard</dt><dd><kbd>−</kbd><kbd>+</kbd> / <kbd>Space</kbd></dd></div>
+      <div><dt>Find a photo lookout</dt><dd>Field guide → Photo studies</dd></div>
+    </dl>
+    <p class="touch-note">On a touchscreen, start walking to use the direction pad. Drag with a second finger to turn.</p>
+  </dialog>
+</body>
+</html>

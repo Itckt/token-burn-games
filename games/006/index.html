@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101418">
+  <meta name="description" content="Drive the Kowloon Loop from the front carriage of an original, offline 3D rail simulator.">
+  <title>Nightline — Kowloon Loop</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="js/math.js"></script>
+  <script defer src="js/route.js"></script>
+  <script defer src="js/line-speed.js"></script>
+  <script defer src="js/daylight.js"></script>
+  <script defer src="js/signals.js"></script>
+  <script defer src="js/recorder.js"></script>
+  <script defer src="js/service.js"></script>
+  <script defer src="js/duties.js"></script>
+  <script defer src="js/comfort.js"></script>
+  <script defer src="js/saloon.js"></script>
+  <script defer src="js/passengers.js"></script>
+  <script defer src="js/boarding.js"></script>
+  <script defer src="js/traction.js"></script>
+  <script defer src="js/weather.js"></script>
+  <script defer src="js/ride.js"></script>
+  <script defer src="js/camera.js"></script>
+  <script defer src="js/mesh.js"></script>
+  <script defer src="js/shuttle.js"></script>
+  <script defer src="js/commuters.js"></script>
+  <script defer src="js/viaduct.js"></script>
+  <script defer src="js/world.js"></script>
+  <script defer src="js/surfaces.js"></script>
+  <script defer src="js/shaders.js"></script>
+  <script defer src="js/renderer.js"></script>
+  <script defer src="js/icons.js"></script>
+  <script defer src="js/audio.js"></script>
+  <script defer src="js/dom.js"></script>
+  <script defer src="js/run-sheet.js"></script>
+  <script defer src="js/instruments.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand"><span class="brand-mark"><canvas data-icon="brand" aria-hidden="true"></canvas></span><span>Nightline</span></div>
+      <span class="brand-description">Rail simulator</span>
+      <nav class="header-tools" aria-label="Simulator settings">
+        <button type="button" class="utility" id="rain-toggle" data-action="rain" aria-label="Rain on the viaducts" aria-pressed="false" title="Toggle rain on the viaducts (T)"><canvas data-icon="rain" aria-hidden="true"></canvas><span id="rain-label">Rain off</span></button>
+        <button type="button" class="utility sound" id="sound" aria-pressed="false" aria-label="Enable sound"><canvas data-icon="muted" aria-hidden="true"></canvas><span id="sound-label">Sound off</span></button>
+        <button type="button" class="utility square" id="fullscreen" aria-label="Enter fullscreen" title="Fullscreen"><canvas data-icon="expand" aria-hidden="true"></canvas></button>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <div class="service-heading">
+      <div>
+        <div class="service-meta"><span class="line-number">LINE 04</span><span class="meta-rule"></span><span>Local service</span></div>
+        <div class="service-title"><h1>Kowloon Loop</h1><span class="chinese-title" lang="zh-HK">九龍環線</span></div>
+      </div>
+      <div class="service-tools">
+        <button class="shift-clock" type="button" id="shift-toggle" data-action="shift" title="Cycle evening, last train and first train (N)">
+          <canvas data-icon="clock" aria-hidden="true"></canvas><span id="shift-name">Evening</span><b id="service-clock">18:05</b>
+        </button>
+        <span class="service-status" id="service-status"><i></i><span id="service-text">In service</span></span>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <section class="cab-card" aria-label="Front carriage and instruments">
+        <div class="viewport" id="viewport">
+          <canvas id="scene" tabindex="0" aria-label="3D front carriage view. Drag to look around. Use the up and down arrow keys to change speed."></canvas>
+          <div class="lens" aria-hidden="true"></div>
+          <div class="camera-label" role="group" aria-label="Carriage view">
+            <button type="button" id="view-front" aria-pressed="true" title="Face the track (R)"><canvas data-icon="camera" aria-hidden="true"></canvas>Cab 01</button>
+            <button type="button" id="view-platform" aria-pressed="false" title="Face the platform doors (V)">Platform</button>
+            <button type="button" id="view-left" aria-pressed="false" title="Watch the parallel track (L)">Left window</button>
+            <button type="button" id="view-saloon" aria-pressed="false" title="Take a passenger seat (I)">Saloon</button>
+          </div>
+          <div class="feed-label" id="feed-label"><i></i><span id="feed-text">Live</span></div>
+          <div class="track-caption" id="track-caption">
+            <span id="track-place">Kowloon Tong</span>
+            <div class="limit-cue" id="limit-cue" hidden><span class="posted-limit"><b id="posted-speed">80</b> km/h</span><span id="limit-ahead"></span></div>
+            <span id="signal-cue" hidden></span>
+            <strong id="brake-cue" hidden></strong>
+            <div id="brake-gauge" aria-hidden="true" hidden>
+              <div class="brake-scale"><i id="brake-pointer"></i></div>
+              <div class="scale-ends"><span>Short</span><span>Mark</span><span>Long</span></div>
+            </div>
+          </div>
+          <div class="look-hint"><canvas data-icon="pan" aria-hidden="true"></canvas><span>Drag to look</span></div>
+          <div class="notice" id="notice" role="status" hidden></div>
+          <div class="scene-message" id="scene-error" role="alert" hidden><strong>3D view unavailable</strong><span id="error-detail">Enable WebGL or hardware acceleration in your browser and reopen this page.</span></div>
+          <div class="pause-screen" id="pause-screen" hidden><button type="button" class="resume" data-action="pause"><canvas data-icon="play" aria-hidden="true"></canvas>Resume ride</button></div>
+          <noscript><div class="scene-message"><strong>JavaScript is required</strong><span>Enable JavaScript in your browser to start the simulator.</span></div></noscript>
+        </div>
+        <div id="saloon-caption" class="saloon-caption" role="status" aria-atomic="true" hidden>
+          <span id="saloon-english"></span><span id="saloon-chinese" lang="zh-HK"></span>
+        </div>
+        <div class="instruments" aria-label="Live instruments">
+          <div class="instrument speed"><span class="label">Speed</span><div class="readout"><strong id="speed-value">00</strong><span>km/h</span></div></div>
+          <div class="instrument target"><span class="label">Target speed</span><div class="target-value"><b id="target-value">0</b><span>km/h</span></div><div class="segments" id="segments" aria-hidden="true"></div></div>
+          <div class="instrument"><span class="label">Drive state</span><div class="state-value"><span class="drive-icon"><canvas data-icon="drive" aria-hidden="true"></canvas></span><b id="drive-state">Ready</b></div></div>
+          <div class="instrument"><span class="label">Platform doors</span><div class="state-value"><canvas data-icon="doors" aria-hidden="true"></canvas><b id="door-state">Closed</b></div></div>
+        </div>
+        <div class="power-strip" aria-label="Front carriage traction energy">
+          <div class="line-power"><span class="label">Line power</span><strong id="power-value">0 kW</strong>
+            <div class="power-track" aria-hidden="true"><i id="power-bar"></i></div></div>
+          <div class="energy-totals"><span>Drawn <b id="energy-drawn">0.00</b> kWh</span><span>Returned <b id="energy-returned">0.00</b> kWh</span></div>
+        </div>
+        <div class="guard-desk" id="guard-desk" hidden>
+          <div><span class="label">Guard's panel</span><strong id="guard-instruction" role="status"></strong></div>
+          <button type="button" class="drive-control" id="departure-bell" data-action="bell"><kbd>B</kbd>Departure bell</button>
+        </div>
+      </section>
+
+      <aside class="monitor" aria-labelledby="route-title">
+        <div class="monitor-heading"><h2 id="route-title">Route monitor</h2><span class="route-badge">KL</span></div>
+        <div class="route-meta"><canvas data-icon="loop" aria-hidden="true"></canvas>Clockwise<span class="separator-dot"></span>5 stations</div>
+        <ol class="stations" id="stations" aria-label="Stations on the Kowloon Loop"></ol>
+        <div class="next-stop">
+          <div class="next-top"><span class="label">Next stop</span><span id="distance">432 m</span></div>
+          <strong id="next-name">Campus Gate</strong>
+          <div class="progress-track" id="leg-progress" role="progressbar" aria-label="Progress to next station" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="leg-fill"></i></div>
+          <div class="running-time"><span>Run time / booked</span><span><b id="elapsed-time">0:00</b> / <b id="booked-time">0:42</b></span></div>
+        </div>
+        <div class="car-load">
+          <div class="next-top"><span class="label">Front carriage load</span><strong id="load-value">6 / 18</strong></div>
+          <div class="load-track" aria-hidden="true"><i id="load-fill"></i></div>
+          <p id="exchange-state"></p>
+          <p id="campus-group" hidden>Campus three-a-side team to Lok Fu</p>
+        </div>
+      </aside>
+
+      <section class="controls-panel" aria-labelledby="controls-title">
+        <div class="control-heading"><div><canvas data-icon="keyboard" aria-hidden="true"></canvas><h2 id="controls-title">Drive controls</h2></div><button class="guide-link" type="button" id="guide-open">Key guide<canvas data-icon="arrowCorner" aria-hidden="true"></canvas></button></div>
+        <div class="control-grid">
+          <button type="button" class="drive-control" data-action="faster"><kbd>↑</kbd><span>Accelerate</span></button>
+          <button type="button" class="drive-control" data-action="slower"><kbd>↓</kbd><span>Decelerate</span></button>
+          <button type="button" class="drive-control" data-action="coast" id="coast" aria-pressed="false" title="Cut traction or resume the selected target"><kbd>C</kbd><span>Coast</span></button>
+          <button type="button" class="drive-control" data-action="brake"><kbd class="wide-key">Space</kbd><span>Brake</span></button>
+          <button type="button" class="drive-control" data-action="doors"><kbd>D</kbd><span>Doors</span></button>
+          <button type="button" class="drive-control" data-action="mode" id="manual-mode" aria-pressed="false" title="Toggle manual stopping while berthed"><kbd>M</kbd><span>Manual stops</span></button>
+          <button type="button" class="drive-control" data-action="wipe" title="Sweep the windscreen once"><kbd>X</kbd><span>Wipe glass</span></button>
+          <button type="button" class="drive-control" data-action="pause"><kbd>P</kbd><span id="pause-label">Pause</span></button>
+        </div>
+        <div class="working-controls" role="group" aria-label="Options available at a station">
+          <button type="button" class="working-switch" id="signal-toggle" data-action="signals" aria-label="Signal working" aria-pressed="false" title="Change signal working at a station (G)"><kbd>G</kbd>Signal working<span id="signal-setting">Off</span></button>
+          <button type="button" class="working-switch" id="limits-toggle" data-action="limits" aria-label="Line speed supervision" aria-pressed="false" title="Follow the posted curve limits (Z)"><kbd>Z</kbd>Line speed limits<span id="limits-setting">Off</span></button>
+          <button type="button" class="working-switch" id="guard-toggle" data-action="guard" aria-label="Guard working" aria-pressed="false" title="Work the doors and departure bell at each stop (J)"><kbd>J</kbd>Guard working<span id="guard-setting">Off</span></button>
+        </div>
+        <section class="duty-card" aria-labelledby="duty-label">
+          <div class="duty-choice"><label for="duty-select" id="duty-label">Duty card</label>
+            <select id="duty-select" aria-describedby="duty-brief"></select></div>
+          <div class="duty-body"><p id="duty-brief">Choose a duty at a station to score the next leg.</p>
+            <p id="duty-live" hidden></p><p id="duty-result" role="status" hidden></p></div>
+        </section>
+      </section>
+    </div>
+    <details class="run-sheet" id="run-sheet">
+      <summary><span>Run sheet</span><span id="sheet-summary">0 stops</span></summary>
+      <p id="sheet-empty">Your first entry appears when the doors unlock at Campus Gate.</p>
+      <div class="sheet-scroll" id="sheet-results" hidden>
+        <table aria-label="Last five arrivals, newest first">
+          <thead><tr><th scope="col">Arrival</th><th scope="col">Run time</th><th scope="col">Booked</th><th scope="col">Timing</th><th scope="col">Stop mark</th><th scope="col">Drawn (kWh)</th><th scope="col">Returned (kWh)</th><th scope="col">Service clock</th></tr></thead>
+          <tbody id="sheet-rows"></tbody>
+        </table>
+      </div>
+      <section class="recorder" id="cab-recorder" aria-labelledby="recorder-title" hidden>
+        <div class="recorder-heading"><h2 id="recorder-title">Cab recorder</h2><select id="trace-leg" aria-label="Recorded leg"></select></div>
+        <div class="trace-legend"><span class="trace-speed">Speed</span><span class="trace-target">Target</span><span class="trace-limit" id="trace-limit" hidden>Posted limit</span><span>km/h</span></div>
+        <div class="trace-chart" aria-hidden="true">
+          <div class="trace-axis"><span>80</span><span>40</span><span>0</span></div>
+          <div class="trace-graph"><canvas id="trace-plot"></canvas><i id="trace-cursor"></i></div>
+        </div>
+        <div class="trace-scale" aria-hidden="true"><span>0:00</span><span id="trace-end"></span></div>
+        <div class="trace-scrub"><label for="trace-sample">Inspect run</label><input type="range" id="trace-sample" min="0" max="1" step="1" value="0"></div>
+        <div class="trace-readout"><b id="trace-time"></b><span id="trace-reading"></span></div>
+        <div class="trip-review" id="trip-review" hidden><strong id="review-heading">Ride quality</strong>
+          <span id="review-forces"></span><span id="review-duty" hidden></span></div>
+      </section>
+    </details>
+    <footer><span><canvas data-icon="info" aria-hidden="true"></canvas><span id="drive-hint">Press ↑ to depart or D to open the doors. Stops are automatic.</span></span><span class="location"><canvas data-icon="pin" aria-hidden="true"></canvas>Kowloon, Hong Kong</span></footer>
+  </main>
+
+  <dialog id="guide" aria-labelledby="guide-title">
+    <div class="dialog-heading"><div><span class="label">Cab 01</span><h2 id="guide-title">Key guide</h2></div><button type="button" class="utility square" id="guide-close" aria-label="Close key guide"><canvas data-icon="close" aria-hidden="true"></canvas></button></div>
+    <p>Select a target speed to depart. Assisted stops brake and board automatically. In manual mode, use the S board and brake cue. The train levels the final 8 m with its doors locked.</p>
+    <dl class="key-list">
+      <div><dt><kbd>↑</kbd> <kbd>W</kbd></dt><dd>Raise target by 10 km/h</dd></div>
+      <div><dt><kbd>↓</kbd> <kbd>S</kbd></dt><dd>Lower target by 10 km/h</dd></div>
+      <div><dt><kbd>Space</kbd></dt><dd>Brake to a standstill</dd></div>
+      <div><dt><kbd>C</kbd></dt><dd>Coast with traction off. Press again to resume the selected target. Stop protection stays active.</dd></div>
+      <div><dt><kbd>D</kbd></dt><dd>Open or close doors at a station</dd></div>
+      <div><dt><kbd>M</kbd></dt><dd>Toggle manual stops while berthed. Follow the cab cue and press Space to stop within 1 m of the S board.</dd></div>
+      <div><dt><kbd>G</kbd></dt><dd>Switch signal working on or off at a station. Amber warns of a red signal ahead. The train brakes and waits for green, then resumes your target.</dd></div>
+      <div><dt><kbd>Z</kbd></dt><dd>Enable line speed limits at a berth. Read the boards on the right. Supervision brakes for the amber speed and releases at the green 80 board.</dd></div>
+      <div><dt><kbd>J</kbd> <kbd>B</kbd></dt><dd>Enable guard working at a berth with J. Open with D, let people cross, then close with D. When the lamp turns white, B rings two bells and clears departure.</dd></div>
+      <div><dt><kbd>N</kbd></dt><dd>Cycle the service clock through evening, last train and first train. Ten seconds between stations advances the clock by one minute.</dd></div>
+      <div><dt><kbd>P</kbd></dt><dd>Pause or resume the ride</dd></div>
+      <div><dt><kbd>T</kbd></dt><dd>Toggle rain. The wiper runs automatically on a wet viaduct.</dd></div>
+      <div><dt><kbd>X</kbd></dt><dd>Sweep the windscreen once, including inside a tunnel.</dd></div>
+      <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Look left or right. Drag for a free look.</dd></div>
+      <div><dt><kbd>V</kbd></dt><dd>Switch between the cab and platform views</dd></div>
+      <div><dt><kbd>L</kbd></dt><dd>Look through the left window for the counter-running campus shuttle on either viaduct.</dd></div>
+      <div><dt><kbd>I</kbd></dt><dd>Take a seat in the saloon. The overhead display names the stop and reports signal holds and door movements. Drag to look around from your seat.</dd></div>
+      <div><dt><kbd>R</kbd></dt><dd>Recenter the cab view</dd></div>
+      <div><dt><kbd>H</kbd> <kbd>?</kbd></dt><dd>Open or close this guide</dd></div>
+    </dl>
+    <p>Choose a duty card at a berth for a coasting, steady-carriage or precision-stop run. The run sheet records the result and the peak forces felt by standing passengers.</p>
+  </dialog>
+</body>
+</html>

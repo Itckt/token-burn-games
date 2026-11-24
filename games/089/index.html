@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f4ee">
+  <title>Impulse Court · 2D collision simulator</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="court-geometry.js"></script>
+  <script defer src="physics.js"></script>
+  <script defer src="scenes.js"></script>
+  <script defer src="court-report.js"></script>
+  <script defer src="court-view.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div class="identity">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>Impulse Court</h1>
+          <p>2D collision simulator</p>
+        </div>
+      </div>
+      <span class="run-state" id="run-state" role="status">Ready</span>
+    </header>
+
+    <noscript>The interactive court uses JavaScript. The terminal version runs with
+      <code>node simulate.js</code>.</noscript>
+
+    <main class="workspace">
+      <div class="simulation">
+        <section class="arena" aria-labelledby="scene-name">
+          <div class="arena-heading">
+            <h2 id="scene-name">Kowloon Six</h2>
+            <span id="dimensions" class="dimensions" aria-label="Court dimensions">840 × 480 u</span>
+          </div>
+          <div class="surface" id="surface">
+            <canvas id="court" width="840" height="480" aria-label="Bouncing balls on a rectangular court"
+              aria-describedby="launch-hint">The terminal version draws the same court with text.</canvas>
+          </div>
+          <div class="transport">
+            <button id="toggle-play" class="play-button" type="button" title="Play or pause (Space)">
+              <span class="play-icon" aria-hidden="true"></span><span id="play-label">Play</span>
+            </button>
+            <button id="single-step" class="transport-button" type="button" title="Advance one tick (.)">
+              <span class="step-icon" aria-hidden="true"></span>Step
+            </button>
+            <button id="next-impact" class="transport-button" type="button" title="Pause at the next collision">Next impact</button>
+            <button id="reset" class="transport-button" type="button" title="Restart the current scene">
+              <span class="reset-icon" aria-hidden="true">↺</span>Reset
+            </button>
+            <span class="clock"><span>Sim time</span><output id="sim-time" aria-live="off">0.000 s</output></span>
+          </div>
+        </section>
+
+        <dl class="readouts" aria-label="Simulation measurements" aria-live="off">
+          <div><dt>Balls</dt><dd id="ball-count">6</dd></div>
+          <div><dt>Ball impacts</dt><dd id="ball-hits">0</dd></div>
+          <div><dt>Wall impacts</dt><dd id="wall-hits">0</dd></div>
+          <div id="bumper-reading" hidden><dt>Bumper impacts</dt><dd id="bumper-hits">0</dd></div>
+          <div id="rail-reading" hidden><dt>Rail impacts</dt><dd id="rail-hits">0</dd></div>
+          <div><dt>Kinetic energy</dt><dd id="energy">0</dd></div>
+        </dl>
+        <p id="launch-hint" class="hint"><span class="aim-icon" aria-hidden="true"></span>
+          <span id="tool-hint">Click an empty spot to place a ball. Drag in the direction of travel to launch it.</span></p>
+        <p id="feedback" class="feedback" role="status"></p>
+        <div class="inspection">
+          <details id="impact-panel">
+            <summary>Recent impacts</summary>
+            <label for="pause-on">Pause playback on</label>
+            <select id="pause-on"></select>
+            <p id="impact-empty">No impacts recorded since loading this court.</p>
+            <ol id="impact-log" aria-label="Most recent impacts first" aria-live="off"></ol>
+          </details>
+          <details>
+            <summary>Checkpoint JSON</summary>
+            <label for="checkpoint-json">Capture this court or paste a saved run.</label>
+            <textarea id="checkpoint-json" rows="5" spellcheck="false"></textarea>
+            <div class="checkpoint-actions">
+              <button type="button" id="capture-checkpoint">Capture</button>
+              <button type="button" id="restore-checkpoint">Restore</button>
+            </div>
+            <p id="checkpoint-status" role="status"></p>
+          </details>
+          <details>
+            <summary>Trajectory forecast</summary>
+            <label for="forecast-ball">Ball to follow</label>
+            <div class="input-actions">
+              <select id="forecast-ball"></select>
+              <button type="button" id="predict-path">Predict 2 s</button>
+              <button type="button" id="clear-forecast" disabled>Clear</button>
+            </div>
+            <p>Prediction pauses the court. Dots mark impacts along the dashed path. A ring marks its end.</p>
+            <p id="forecast-status" role="status"></p>
+          </details>
+          <details id="gate-panel" hidden>
+            <summary>Timing gates</summary>
+            <ul id="gate-totals" aria-label="Total crossings by gate"></ul>
+            <ol id="gate-log" aria-label="Recent crossings, newest first"></ol>
+          </details>
+          <details>
+            <summary>Ball impulse</summary>
+            <label for="impulse-ball">Ball to push</label>
+            <select id="impulse-ball"></select>
+            <div class="component-fields">
+              <label for="impulse-x">Horizontal impulse<input id="impulse-x" type="number" step="any" value="120"></label>
+              <label for="impulse-y">Vertical impulse<input id="impulse-y" type="number" step="any" value="0"></label>
+            </div>
+            <div class="input-actions"><button type="button" id="apply-impulse">Apply impulse</button></div>
+            <p>Applying an impulse pauses the court. Each velocity component changes by impulse divided by ball mass.</p>
+            <p id="impulse-status" role="status"></p>
+          </details>
+          <details>
+            <summary>Surface elasticity</summary>
+            <label for="material-surface">Fixed surface</label>
+            <select id="material-surface"></select>
+            <label for="surface-value">Elasticity from 0 to 1. Leave blank to use the court value.</label>
+            <div class="input-actions">
+              <input id="surface-value" type="number" min="0" max="1" step="any">
+              <button type="button" id="apply-surface">Apply</button>
+            </div>
+            <p id="surface-status" role="status"></p>
+          </details>
+        </div>
+      </div>
+
+      <aside class="controls" aria-labelledby="controls-heading">
+        <h2 id="controls-heading">Court controls</h2>
+        <div class="control-group scene-group">
+          <label for="scene">Scene</label>
+          <select id="scene" aria-describedby="scene-description"></select>
+          <p id="scene-description"></p>
+          <div id="seed-controls" hidden>
+            <label for="draw-seed">Practice seed</label>
+            <div class="input-actions">
+              <input id="draw-seed" type="number" min="0" max="4294967295" step="1" value="852">
+              <button type="button" id="deal-court">Deal court</button>
+            </div>
+          </div>
+        </div>
+        <div class="control-group sliders">
+          <div>
+            <div class="control-label"><label for="elasticity">Elasticity</label>
+              <output id="elasticity-value" for="elasticity">1.00</output></div>
+            <input id="elasticity" type="range" min="0" max="1" step="0.05" value="1">
+          </div>
+          <div>
+            <div class="control-label"><label for="drag">Linear drag</label>
+              <output id="drag-value" for="drag">0 /s</output></div>
+            <input id="drag" type="range" min="0" max="2" step="0.05" value="0">
+          </div>
+          <div>
+            <div class="control-label"><label for="speed">Playback speed</label>
+              <output id="speed-value" for="speed">1×</output></div>
+            <input id="speed" type="range" min="0.25" max="2" step="0.25" value="1">
+          </div>
+        </div>
+        <div class="control-group scene-group">
+          <label for="draw-tool">Canvas tool</label>
+          <select id="draw-tool">
+            <option value="ball">Launch a ball</option>
+            <option value="rail">Draw a rail</option>
+            <option value="gate">Draw a timing gate</option>
+          </select>
+        </div>
+        <fieldset class="overlays">
+          <legend>Display</legend>
+          <label><span>Motion trails</span><input type="checkbox" id="trails" checked></label>
+          <label><span>Velocity arrows</span><input type="checkbox" id="vectors"></label>
+        </fieldset>
+        <button class="add-button" id="add-ball" type="button"><span aria-hidden="true">+</span>Add a ball</button>
+      </aside>
+    </main>
+  </div>
+</body>
+</html>

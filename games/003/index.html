@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b14">
+  <title>Rift Relay — Neon Causeway</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23141622'/%3E%3Cpath fill='%2353eedf' d='M8 29 14 9h17l-2 6H19l-5 14zm10 0 5-10h8l-6 10z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="js/math.js"></script>
+  <script defer src="js/mesh.js"></script>
+  <script defer src="js/signal.js"></script>
+  <script defer src="js/roster.js"></script>
+  <script defer src="js/coils.js"></script>
+  <script defer src="js/freight.js"></script>
+  <script defer src="js/salvage.js"></script>
+  <script defer src="js/projectiles.js"></script>
+  <script defer src="js/drills.js"></script>
+  <script defer src="js/battle.js"></script>
+  <script defer src="js/replay.js"></script>
+  <script defer src="js/shelf.js"></script>
+  <script defer src="js/models.js"></script>
+  <script defer src="js/arena.js"></script>
+  <script defer src="js/renderer.js"></script>
+  <script defer src="js/workshop.js"></script>
+  <script defer src="js/instruments.js"></script>
+  <script defer src="js/dialogs.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <svg class="symbol-bank" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-controls" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M6 9h1m3 0h1m3 0h1m3 0h.1M6 12h1m3 0h1m3 0h1m3 0h.1M8 15h8"/></symbol>
+    <symbol id="i-silent" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM17 9l5 6m0-6-5 6"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M3 9h4l5-4v14l-5-4H3zM16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3v14H7zm7 0h3v14h-3z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m7 4 13 8-13 8z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-deck" viewBox="0 0 24 24"><path d="m3 8 9-5 9 5-9 5zM3 12l9 5 9-5M3 16l9 5 9-5"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="m14 1-11 13h8l-1 9L22 9h-9z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-aim" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.6"/><circle cx="12" cy="12" r="1.75" fill="currentColor" stroke="none"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></symbol>
+    <symbol id="i-feed" viewBox="0 0 24 24"><path d="M2 12h4l3-7 5 14 3-7h5"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.1M3 12h.1M3 18h.1"/></symbol>
+    <symbol id="i-films" viewBox="0 0 24 24"><path d="M3 5h15v12H3zM6 20h15V8"/><path d="m9 8 5 3-5 3z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><path d="m12 2 9 5v10l-9 5-9-5V7zM12 11v5M12 8v.2"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12m0-12L6 18"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+    <symbol id="i-cache" viewBox="0 0 24 24"><path d="m12 2 7 6-7 7-7-7zm-7 11 7 7 7-7m-7 2v5"/></symbol>
+    <symbol id="i-guard" viewBox="0 0 24 24"><path d="m12 2 8 4v6c0 4-4 7-8 10-4-3-8-6-8-10V6z"/><path d="m8 11 3 3 5-6"/></symbol>
+    <symbol id="i-coil" viewBox="0 0 24 24"><path d="M3 6h6M4 9h4m-5 3h6m-3 0v6m9-12h6m-5 3h4m-5 3h6m-3 0v6M3 19h6m6 0h6m-10-5 3-5"/></symbol>
+    <symbol id="i-player" viewBox="0 0 32 32"><path fill="currentColor" stroke="none" d="m3 7 7 2 6 9 6-9 7-2-6 13-7 5-7-5zm9-2 4 3 4-3-4 8z"/></symbol>
+    <symbol id="i-rival" viewBox="0 0 32 32"><path fill="currentColor" stroke="none" d="m4 5 9 4 3 7 3-7 9-4-3 12-6 3-3 8-3-8-6-3zm4 5 2 4 3 1-2-4zm16 0-3 1-2 4 3-1z"/></symbol>
+  </svg>
+  <header class="masthead">
+    <div class="mast-inner">
+      <div class="brand" aria-label="Rift Relay">
+        <svg class="brand-mark" viewBox="0 0 47 42" aria-hidden="true"><path fill="currentColor" d="M1 34 10 6h29l-3.1 8.1H18.6L12.3 34zm15.7 0 3.1-8.1h6.6l-4-5.8 3.2-3.4h11.1l-4.4 7 6.4 10.3z"/><path fill="currentColor" opacity=".55" d="m37 6 7-3-2.7 8-5.7 2.8z"/></svg>
+        <span>RIFT <span class="brand-last">RELAY</span></span>
+      </div>
+      <nav class="utility-nav" aria-label="Game settings">
+        <button id="shelf-button" class="utility" aria-haspopup="dialog" aria-label="Open replay shelf" title="Replay shelf"><svg class="icon"><use href="#i-films"/></svg><span>Replays</span></button>
+        <button id="help-button" class="utility"><svg class="icon"><use href="#i-controls"/></svg><span>Controls</span></button>
+        <span class="nav-divider"></span>
+        <button id="sound-button" class="utility" aria-pressed="false" aria-label="Turn sound on"><svg class="icon"><use href="#i-silent"/></svg><span>Sound off</span></button>
+      </nav>
+    </div>
+  </header>
+  <main class="workspace">
+    <div class="title-row">
+      <div>
+        <div class="location"><span class="sector-stripes" aria-hidden="true"><i></i><i></i><i></i></span><span>ARENA 01</span><span class="location-slash">/</span><svg class="icon"><use href="#i-pin"/></svg><span>KOWLOON TONG</span></div>
+        <h1>Neon Causeway</h1>
+      </div>
+      <div class="match-tools"><span class="live-state"><i></i><span id="phase-text">STANDBY</span></span><button id="return-original" class="utility boxed" hidden>Original replay</button><button id="pause-button" class="utility boxed" title="Pause or resume (P)"><svg class="icon"><use href="#i-pause"/></svg><span>Pause</span></button></div>
+    </div>
+    <div class="console">
+      <section class="arena-panel panel" aria-label="Battle arena">
+        <div class="scoreboard">
+          <div class="faction ally"><div class="crest"><svg class="icon"><use href="#i-player"/></svg></div><div><small>YOUR SIDE</small><strong>Player 01</strong></div></div>
+          <div class="score-center"><b class="points ally" id="score-player" title="Enemy relays destroyed">0</b><div class="timer"><small>MATCH TIME</small><time id="time">03:00</time></div><b class="points enemy" id="score-rival" title="Your relays destroyed">0</b></div>
+          <div class="faction enemy"><div><small>OPPONENT</small><strong>Vanta AI</strong></div><div class="crest"><svg class="icon"><use href="#i-rival"/></svg></div></div>
+        </div>
+        <div class="objective-strip" id="objective-strip" hidden>
+          <svg class="icon" aria-hidden="true"><use href="#i-aim"/></svg><strong id="objective-name"></strong>
+          <span id="objective-detail"></span><span class="objective-meter" id="objective-meter" aria-hidden="true"><i id="objective-fill"></i></span>
+          <div class="salvage-cargo" id="salvage-cargo" role="group" aria-label="Unbanked fuses" hidden><span>You carry <b id="cargo-player">0</b></span><span>Vanta carries <b id="cargo-rival">0</b></span></div>
+        </div>
+        <div class="freight-strip" id="freight-strip" role="group" aria-label="Cart positions" hidden></div>
+        <div class="signal-strip" id="signal-strip">
+          <span class="signal-name"><svg class="icon" aria-hidden="true"><use href="#i-cache"/></svg>Signal cache</span>
+          <span class="signal-lane" id="signal-lane">Lane A</span>
+          <span id="signal-status">Arrives in 8s</span>
+          <span class="signal-meter" id="signal-meter" role="meter" aria-label="Cache capture progress" aria-valuemin="0" aria-valuemax="100" hidden><i id="signal-fill"></i></span>
+          <span class="signal-reward" title="Hold the lit bridge center alone for two seconds to collect two energy"><svg class="icon" aria-hidden="true"><use href="#i-bolt"/></svg>+2 energy</span>
+        </div>
+        <div class="viewport" id="viewport">
+          <canvas id="field" role="img" aria-label="Two-lane 3D battle board. Your cyan relays are on the left. Use the Lane A and Lane B buttons below to deploy."></canvas>
+          <div class="world-labels" id="world-labels" aria-hidden="true"></div>
+          <button class="camera-button" id="camera-button" title="Switch camera (V)" aria-label="Switch to tactical camera"><svg class="icon"><use href="#i-camera"/></svg><span>CAM 01</span></button>
+          <button class="expand-button" id="expand-button" title="Toggle fullscreen" aria-label="Toggle fullscreen"><svg class="icon"><use href="#i-expand"/></svg></button>
+          <div class="notice" id="notice" role="status" hidden></div>
+          <div class="field-overlay" id="overlay" role="region" aria-labelledby="overlay-title" hidden><div class="overlay-card"><div class="overlay-glyph" id="overlay-glyph"><svg class="icon"><use href="#i-pause"/></svg></div><small class="eyebrow" id="overlay-kicker"></small><h2 id="overlay-title"></h2><p id="overlay-body"></p><div class="overlay-actions"><button class="primary" id="overlay-main">Resume</button><button class="secondary" id="watch-replay" hidden>Watch replay</button><button class="secondary" id="overlay-second">Restart match</button></div></div></div>
+          <noscript><div class="no-script">Enable JavaScript in your browser to play Rift Relay.</div></noscript>
+        </div>
+        <div class="deploy-strip" id="deploy-strip">
+          <div class="deploy-label"><span class="aim-box"><svg class="icon"><use href="#i-aim"/></svg></span><div><small id="deploy-caption">DEPLOY SELECTED</small><strong id="deploy-name">Arc Strider</strong></div></div>
+          <button class="coil-toggle" id="coil-toggle" aria-pressed="false" aria-keyshortcuts="F" aria-controls="coil-sockets" title="Aim a snare coil (F)"><svg class="icon" aria-hidden="true"><use href="#i-coil"/></svg><span>Snare coil<small id="coil-status">Deploy first</small></span><kbd>F</kbd></button>
+          <div class="lane-actions"><button class="lane-button" id="lane-a" data-lane="0">Lane A <kbd>Q</kbd></button><button class="lane-button" id="lane-b" data-lane="1">Lane B <kbd>E</kbd></button></div>
+        </div>
+        <div class="coil-sockets" id="coil-sockets" role="group" aria-label="Coil socket" hidden>
+          <span>Pick a socket, then a lane</span>
+          <div><button id="socket-home">Home</button><button id="socket-center">Center</button><button id="socket-away">Away</button></div>
+        </div>
+        <div class="replay-strip" id="replay-strip" role="group" aria-label="Match replay" hidden>
+          <button class="replay-toggle" id="replay-toggle" aria-label="Pause replay"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg><span>Pause</span></button>
+          <input type="range" id="replay-seek" min="0" max="1" step="1" value="0" aria-label="Replay position">
+          <time id="replay-time">00:00 / 00:00</time>
+          <button id="replay-speed" title="Change playback speed">1×</button>
+          <button id="take-over" title="Play from this moment in a separate practice match">Take command</button>
+          <button id="exit-replay">Results</button>
+          <div class="key-plays"><label for="replay-moment">Key plays</label><select id="replay-moment"></select><button id="replay-lead" title="Pause two seconds before the selected play">2s before</button></div>
+        </div>
+      </section>
+      <aside class="deck-panel panel" aria-labelledby="deck-title">
+        <div class="deck-heading"><svg class="icon"><use href="#i-deck"/></svg><h2 id="deck-title">Command deck</h2><button id="match-setup" class="setup-button" aria-haspopup="dialog" title="Edit your deck and choose a match format">Match setup</button></div>
+        <div class="energy-wrap">
+          <div class="energy-caption"><span><svg class="icon"><use href="#i-bolt"/></svg> ENERGY</span><strong><b id="energy-number">7</b><em> / 10</em></strong></div>
+          <div class="energy-meter" id="energy-meter" role="meter" aria-label="Deployment energy" aria-valuemin="0" aria-valuemax="10" aria-valuenow="7"></div>
+        </div>
+        <div class="cards" id="cards" role="group" aria-label="Choose a unit card"></div>
+        <div class="unit-intel"><svg class="icon"><use href="#i-info"/></svg><div><small id="intel-label">UNIT INTEL</small><p id="unit-info">Fast twin blades close the gap on ranged units.</p></div></div>
+        <section class="guard-panel" aria-labelledby="guard-title">
+          <div class="guard-heading"><svg class="icon" aria-hidden="true"><use href="#i-guard"/></svg><h3 id="guard-title">Lane guard</h3><span id="guard-status">Standby</span></div>
+          <p>Halve incoming damage on one lane for 5s.</p>
+          <div class="guard-actions"><button id="guard-a" aria-keyshortcuts="Z">Guard A <kbd>Z</kbd></button><button id="guard-b" aria-keyshortcuts="X">Guard B <kbd>X</kbd></button></div>
+        </section>
+      </aside>
+    </div>
+    <div class="feed-bar"><span class="feed-label"><svg class="icon"><use href="#i-feed"/></svg>Battle feed</span><time id="feed-time">03:00</time><p id="feed-message" aria-live="polite">Opening move is yours. Deploy a card to start the clock.</p><button id="history-button" title="Open battle history" aria-label="Open battle history"><svg class="icon"><use href="#i-list"/></svg><span>History</span></button></div>
+  </main>
+  <dialog id="dialog" aria-labelledby="dialog-heading">
+    <div class="dialog-head"><div><span class="eyebrow" id="dialog-kicker">FIELD MANUAL</span><h2 id="dialog-heading">How to play</h2></div><button class="icon-button" id="close-dialog" aria-label="Close dialog"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div id="dialog-content"></div>
+    <div id="setup-fields" hidden>
+      <label class="setup-label" for="setup-mode">Match format</label>
+      <select id="setup-mode" aria-describedby="setup-brief"></select>
+      <p id="setup-brief"></p>
+      <h3 class="setup-label">Deck slots</h3>
+      <div id="setup-slots" role="group" aria-label="Choose a slot to edit"></div>
+      <p class="setup-hint">Choose a slot, then a machine. Selecting one already in your deck swaps their slots.</p>
+      <div id="setup-roster" role="group" aria-label="Available machines"></div>
+      <p id="setup-intel" aria-live="polite"></p>
+    </div>
+    <div class="dialog-actions"><button class="secondary" id="setup-cancel" hidden>Cancel</button><button class="primary" id="dialog-done">Back to arena</button></div>
+  </dialog>
+</body>
+</html>

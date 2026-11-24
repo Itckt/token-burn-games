@@ -1,0 +1,13 @@
+{
+  "name": "embertrail",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An offline daily habit journal with a pixel-art reward calendar.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tools/run-tests.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

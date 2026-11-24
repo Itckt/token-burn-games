@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#141e23">
+  <title>Slipwake · Relay Yard</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="src/math.js"></script>
+  <script defer src="src/arena.js"></script>
+  <script defer src="src/pickup.js"></script>
+  <script defer src="src/supply.js"></script>
+  <script defer src="src/relay.js"></script>
+  <script defer src="src/signal.js"></script>
+  <script defer src="src/freight.js"></script>
+  <script defer src="src/deck.js"></script>
+  <script defer src="src/bolts.js"></script>
+  <script defer src="src/bots.js"></script>
+  <script defer src="src/game.js"></script>
+  <script defer src="src/tape.js"></script>
+  <script defer src="src/mesh.js"></script>
+  <script defer src="src/art.js"></script>
+  <script defer src="src/effects.js"></script>
+  <script defer src="src/controls.js"></script>
+  <script defer src="src/renderer.js"></script>
+  <script defer src="src/hud-art.js"></script>
+  <script defer src="src/hud.js"></script>
+  <script defer src="src/menus.js"></script>
+  <script defer src="src/review.js"></script>
+  <script defer src="src/client.js"></script>
+</head>
+<body>
+  <main id="game" aria-label="Slipwake arena brawler">
+    <header class="topbar">
+      <div class="brand" aria-label="Slipwake Arena Circuit">
+        <canvas data-icon="brand" class="brand-mark" aria-hidden="true"></canvas>
+        <div><div class="wordmark">SLIPWAKE</div><div class="brand-sub">ARENA CIRCUIT</div></div>
+      </div>
+      <div class="scoreboard" aria-label="Match scoreboard">
+        <div class="score-side tide">
+          <canvas data-icon="tide" aria-hidden="true"></canvas>
+          <span class="team-label">Undertow</span><strong id="score0">00</strong>
+        </div>
+        <div class="clock"><span id="clock">03:00</span><small id="score-target">FIRST TO 12</small></div>
+        <div class="score-side ember">
+          <strong id="score1">00</strong><span class="team-label">Afterburn</span>
+          <canvas data-icon="ember" aria-hidden="true"></canvas>
+        </div>
+      </div>
+      <nav class="utilities" aria-label="Game settings">
+        <button id="audio" class="icon-button" title="Enable sound (M)" aria-label="Enable sound (M)" aria-pressed="false"><canvas data-icon="muted" aria-hidden="true"></canvas></button>
+        <button id="pause" class="icon-button" title="Pause round (Esc)" aria-label="Pause round (Esc)" aria-pressed="false"><canvas data-icon="pause" aria-hidden="true"></canvas></button>
+      </nav>
+    </header>
+
+    <section id="field" class="field" aria-label="Relay Yard battlefield">
+      <canvas id="arena" tabindex="0" aria-label="3D arena. Move with W A S D, aim with your mouse and hold the left button to fire.">A WebGL-capable browser is required to draw Relay Yard.</canvas>
+      <div class="field-shade" aria-hidden="true"></div>
+      <div class="location">
+        <div class="eyebrow"><i class="signal-ticks" aria-hidden="true"></i>Kowloon circuit</div>
+        <h1>Relay Yard</h1>
+        <div class="mode"><span class="mode-icon" aria-hidden="true">◆</span><span id="mode-name">Team skirmish</span><i></i> 3v3</div>
+        <div id="relay-status" class="relay-status" hidden></div>
+        <div id="signal-status" class="signal-status" hidden>
+          <div class="station-line"><strong id="signal-site"></strong><span id="signal-clock"></span></div>
+          <span id="signal-state"></span>
+          <div class="signal-track" aria-hidden="true"><i id="signal-fill"></i></div>
+        </div>
+        <div id="freight-status" class="freight-status" hidden>
+          <div class="freight-ends"><span>West</span><strong>Freight line</strong><span>East</span></div>
+          <div class="freight-line" aria-hidden="true"><i id="freight-pin"></i></div>
+          <span id="freight-state"></span>
+        </div>
+      </div>
+      <aside class="radar" aria-label="Field radar. Circles mark allies, diamonds mark rivals, brackets mark your focus target and the flag marks your rally. A hexagon marks the core, a ring marks the station, a boxed cross marks supplies and twin rails mark the freight cart.">
+        <div class="radar-title"><span><i></i>Field radar</span><b>N ↑</b></div>
+        <canvas id="radar" width="276" height="146" aria-hidden="true"></canvas>
+        <div id="supply-status" class="supply-status" hidden><strong id="supply-site"></strong><span id="supply-state"></span></div>
+        <button id="crew-sheet" class="roster-link" type="button" title="Open the crew sheet (C)"><canvas data-icon="roster" aria-hidden="true"></canvas><span>Crew sheet</span><kbd>C</kbd></button>
+      </aside>
+      <div id="tags" aria-hidden="true"></div>
+      <div id="damage-numbers" aria-hidden="true"></div>
+      <div id="hitmark" hidden aria-hidden="true"></div>
+      <div id="feed" class="feed" aria-label="Recent knockouts, catches and deliveries"></div>
+      <div id="respawn" class="field-notice" role="status" hidden><span>Runner offline</span><strong id="respawn-text"></strong></div>
+      <div id="deployment" class="deployment">
+        <div class="mode-picker" role="group" aria-label="Match mode">
+          <button id="pick-skirmish" type="button" aria-pressed="true"><canvas data-icon="skirmish" aria-hidden="true"></canvas>Team skirmish</button>
+          <button id="pick-relay" type="button" aria-pressed="false"><canvas data-icon="relay" aria-hidden="true"></canvas>Relay run</button>
+          <button id="pick-signal" type="button" aria-pressed="false"><canvas data-icon="signal" aria-hidden="true"></canvas>Signal shift</button>
+          <button id="pick-freight" type="button" aria-pressed="false"><canvas data-icon="freight" aria-hidden="true"></canvas>Freight tug</button>
+        </div>
+        <div class="launch-row"><span id="round-brief">First to 12 knockouts</span>
+          <button id="edit-deck" type="button">Edit deck</button>
+          <button id="deploy" class="deploy" title="Start with Enter, WASD or a click on the deck"><span class="deploy-arrow" aria-hidden="true"></span>Deploy <kbd>Enter</kbd></button>
+        </div>
+      </div>
+      <noscript><div class="no-script">Enable JavaScript in your browser to play Slipwake.</div></noscript>
+    </section>
+
+    <footer class="dashboard">
+      <section class="runner-panel" aria-label="Your runner">
+        <div class="portrait-frame"><canvas id="portrait" class="portrait-art" aria-hidden="true"></canvas></div>
+        <div class="runner-stats">
+          <div class="runner-team"><span></span>Undertow <i>/</i> You</div>
+          <h2>Coilrunner</h2>
+          <div class="health-line"><div class="health-track" id="health" role="progressbar" aria-label="Health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="hp-fill"></i></div><span id="hp-value"><b id="hp-current">100</b><span> / 100</span></span></div>
+          <button id="vane" class="vane-control" type="button" title="Press F just before a hostile bolt hits to send it back."><canvas data-icon="vane" aria-hidden="true"></canvas><kbd>F</kbd> Return vane <strong id="vane-state">Ready</strong></button>
+        </div>
+      </section>
+      <div class="loadout" aria-label="Weapons and abilities">
+        <div class="ability primary" title="Point at the arena and click or hold the left mouse button to shoot.">
+          <div class="ability-icon"><canvas data-icon="driver" aria-hidden="true"></canvas></div>
+          <div><div class="ability-name">Pulse driver</div><div class="bind"><kbd>LMB</kbd><span>Fire</span></div></div>
+        </div>
+        <div id="dash-card" class="ability" title="Press Space to dash in your movement direction.">
+          <div class="ability-icon"><canvas data-icon="dash" aria-hidden="true"></canvas><span class="cooldown"></span></div>
+          <div><div class="ability-name">Slip dash</div><div class="bind"><kbd>Space</kbd><span>Dash</span></div></div>
+        </div>
+        <div id="pulse-card" class="ability pulse" title="Press E to damage and push back nearby opponents.">
+          <div class="ability-icon"><canvas data-icon="pulse" aria-hidden="true"></canvas><span class="cooldown"></span></div>
+          <div><div class="ability-name">Arc pulse</div><div class="bind"><kbd>E</kbd><span>Burst</span></div></div>
+        </div>
+      </div>
+      <section class="deck-panel" aria-label="Tactic deck">
+        <div class="deck-heading"><strong>Tactic deck</strong><div class="energy-line" title="Card energy"><span class="energy-label">Energy</span>
+          <div id="energy" class="energy" role="meter" aria-label="Tactic energy" aria-valuemin="0" aria-valuemax="6" aria-valuenow="4"><i id="energy-fill"></i></div>
+          <span id="energy-value">4/6</span></div></div>
+        <div class="hand">
+          <button id="card-1" class="deck-card" type="button"><kbd>1</kbd><canvas data-icon="fork" aria-hidden="true"></canvas><strong class="card-name">Fork coil</strong><span class="card-cost">3</span></button>
+          <button id="card-2" class="deck-card" type="button"><kbd>2</kbd><canvas data-icon="patch" aria-hidden="true"></canvas><strong class="card-name">Patch reel</strong><span class="card-cost">2</span></button>
+        </div>
+        <div id="deck-note" class="deck-note">Next · Catch net</div>
+      </section>
+      <div class="controls-panel">
+        <div class="move-hint"><div class="wasd" aria-label="W A S D"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div><span>Move</span></div>
+        <div class="crew-orders">
+          <div class="move-hint" title="Press R over open deck to rally your crew"><kbd>R</kbd><span id="rally-state">Rally crew</span></div>
+          <div class="move-hint" title="Right-click a rival to focus fire. Right-click open deck to clear."><kbd>RMB</kbd><span id="focus-state">Focus fire</span></div>
+        </div>
+        <button id="guide" class="guide-link"><kbd>?</kbd> Field guide</button>
+      </div>
+    </footer>
+  </main>
+  <div id="overlay" class="overlay" hidden>
+    <section id="dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1">
+      <div class="dialog-kicker"><i class="signal-ticks" aria-hidden="true"></i><span>Relay Yard</span></div>
+      <h2 id="dialog-title"></h2>
+      <div id="dialog-content"></div>
+      <div id="dialog-actions" class="dialog-actions"></div>
+    </section>
+  </div>
+  <div id="announcer" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>

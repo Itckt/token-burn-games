@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="An offline, interactive three-dimensional atlas of our solar system.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <title>Solar system · Orbit Atlas</title>
+  <script defer src="js/math.js"></script>
+  <script defer src="js/catalog.js"></script>
+  <script defer src="js/time.js"></script>
+  <script defer src="js/physics.js"></script>
+  <script defer src="js/observations.js"></script>
+  <script defer src="js/encounters.js"></script>
+  <script defer src="js/fieldlog.js"></script>
+  <script defer src="js/lunar.js"></script>
+  <script defer src="js/sky.js"></script>
+  <script defer src="js/camera.js"></script>
+  <script defer src="js/geometry.js"></script>
+  <script defer src="js/surfaces.js"></script>
+  <script defer src="js/shaders.js"></script>
+  <script defer src="js/renderer.js"></script>
+  <script defer src="js/controls.js"></script>
+  <script defer src="js/instruments.js"></script>
+  <script defer src="js/observatory.js"></script>
+  <script defer src="js/planner.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="brand" aria-label="Orbit Atlas">
+        <span class="brand-mark" aria-hidden="true"><i></i><b></b></span>
+        <span>Orbit Atlas</span>
+      </div>
+      <div class="masthead-tools">
+        <button id="sky-open" class="station-button" type="button" aria-haspopup="dialog" aria-controls="observatory-dialog" title="Open the observing station (H)"><span class="ico ico-station" aria-hidden="true"></span>Observatory</button>
+        <span class="masthead-divider" aria-hidden="true"></span>
+        <button id="help-open" class="help-button" type="button" aria-haspopup="dialog">
+          Controls <kbd>?</kbd>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="page-heading" aria-labelledby="page-title">
+      <div class="heading-title"><span class="heading-rule" aria-hidden="true"></span><h1 id="page-title">Solar system</h1></div>
+      <div class="clock-panel">
+        <span id="run-status" class="run-status"><i aria-hidden="true"></i><span id="status-text">Running</span></span>
+        <button class="date-block" id="time-open" type="button" aria-haspopup="dialog" aria-controls="time-dialog" title="Set simulation time (T)">
+          <span class="micro">Simulation date · UTC</span>
+          <span class="date-line"><time id="sim-date" datetime="2026-01-01">01 Jan 2026</time>
+            <span id="sim-hour">00:00</span><span class="ico ico-calendar" aria-hidden="true"></span></span>
+          <span class="sr-only">Set simulation time</span>
+        </button>
+      </div>
+    </section>
+
+    <div class="dashboard">
+      <section class="stage-panel" id="stage-panel" aria-label="Orbital simulation">
+        <div class="stage" id="stage">
+          <canvas id="space" tabindex="0" aria-label="Interactive 3D solar system. Use arrow keys to orbit and plus or minus to zoom. Select planets in the index below."></canvas>
+          <div class="map-labels" id="map-labels" aria-label="Map objects"></div>
+          <div class="selection-marker" id="selection-marker" hidden aria-hidden="true"></div>
+          <div class="view-chip"><span class="ico ico-orbit" aria-hidden="true"></span><span id="view-name">System overview</span></div>
+          <button type="button" id="expand" class="map-button expand-button" title="Expand map" aria-label="Expand map" aria-pressed="false"><span class="ico ico-expand" aria-hidden="true"></span></button>
+          <div class="map-keys" aria-hidden="true">
+            <div class="map-key" id="sweep-key"><span class="key-peri">Perihelion</span><span class="key-aphe">Aphelion</span></div>
+            <div class="map-key trail-key" id="trail-key" hidden><span id="trail-from"></span><span id="trail-to"></span><small id="trail-spacing"></small></div>
+          </div>
+          <div class="stage-hint" aria-hidden="true"><span class="ico ico-mouse"></span><span class="mouse-hint">Drag to orbit <b>·</b> Scroll to zoom</span><span class="touch-hint">Drag to orbit <b>·</b> Pinch to zoom</span></div>
+          <div class="map-navigation" aria-label="Camera controls">
+            <button type="button" id="zoom-out" title="Zoom out (−)" aria-label="Zoom out"><span class="ico ico-minus" aria-hidden="true"></span></button>
+            <button type="button" id="home" title="Reset system view (0)" aria-label="Reset system view"><span class="ico ico-target" aria-hidden="true"></span></button>
+            <button type="button" id="zoom-in" title="Zoom in (+)" aria-label="Zoom in"><span class="ico ico-plus" aria-hidden="true"></span></button>
+          </div>
+          <div class="graphics-error" id="graphics-error" role="alert" hidden>
+            <div><span class="error-orbit ico ico-orbit" aria-hidden="true"></span>
+              <h2 id="error-title">3D view unavailable</h2>
+              <p id="error-detail">This atlas needs WebGL. Enable graphics acceleration in your browser, then reload the page.</p>
+              <button id="retry" type="button">Reload atlas</button>
+            </div>
+          </div>
+          <noscript><div class="no-script">Enable JavaScript to run the orbital simulation.</div></noscript>
+        </div>
+        <div class="stage-toolbar">
+          <div class="playback">
+            <div class="transport">
+              <button type="button" id="reverse" class="reverse-button" aria-label="Reverse time" aria-pressed="false" title="Reverse time (R)"><span class="ico ico-reverse" aria-hidden="true"></span></button>
+              <button type="button" id="play" class="play-button" aria-label="Pause simulation" title="Pause simulation (Space)"><span id="play-icon" class="ico ico-pause" aria-hidden="true"></span></button>
+            </div>
+            <div class="speed-control">
+              <div class="speed-caption"><label for="speed">Time speed</label><output id="speed-value" for="speed">1 d/s</output></div>
+              <input type="range" id="speed" min="0" max="6" step="1" value="2" aria-valuetext="1 day per second">
+            </div>
+          </div>
+          <div class="layer-controls" aria-label="Map layers">
+            <button type="button" class="layer" id="toggle-orbits" aria-pressed="true" title="Toggle orbital paths (O)"><span class="ico ico-orbit" aria-hidden="true"></span>Orbits</button>
+            <button type="button" class="layer" id="toggle-labels" aria-pressed="true" title="Toggle planet labels (L)"><span class="ico ico-label" aria-hidden="true"></span>Labels</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="profile" aria-labelledby="profile-name">
+        <div class="profile-top">
+          <span class="micro">Selected body</span>
+          <div class="cycle">
+            <button type="button" id="previous" aria-label="Inspect previous planet" title="Previous planet"><span class="ico ico-prev" aria-hidden="true"></span></button>
+            <button type="button" id="next" aria-label="Inspect next planet" title="Next planet"><span class="ico ico-next" aria-hidden="true"></span></button>
+          </div>
+        </div>
+        <div class="specimen" id="specimen">
+          <div class="plate-grid" aria-hidden="true"></div><i class="plate-orbit" aria-hidden="true"></i>
+          <i class="plate-tick tick-a" aria-hidden="true"></i><i class="plate-tick tick-b" aria-hidden="true"></i>
+          <canvas id="portrait" role="img" aria-label="Illustrated globe of Earth"></canvas>
+        </div>
+        <div class="profile-details">
+          <h2 id="profile-name">Earth</h2>
+          <p class="family"><i id="family-dot" aria-hidden="true"></i><span id="family">Terrestrial planet</span></p>
+          <p class="description" id="description">Liquid oceans, shifting clouds and a thin atmosphere shape our home world.</p>
+          <dl class="facts">
+            <div><dt id="distance-label">Sun distance</dt><dd id="distance">0.983 AU</dd></div>
+            <div><dt id="period-label">Orbital period</dt><dd id="period">365.26 d</dd></div>
+            <div><dt>Diameter</dt><dd id="diameter">12,742 km</dd></div>
+          </dl>
+          <button type="button" class="follow-button" id="follow"><span class="ico ico-target" aria-hidden="true"></span><span id="follow-text">Follow Earth</span></button>
+        </div>
+      </aside>
+
+      <section class="catalog" aria-labelledby="catalog-title">
+        <div class="catalog-heading"><h2 id="catalog-title">Planet index</h2><span>Mean distance from Sun</span></div>
+        <div class="planet-list" id="planet-list" role="group" aria-label="Select a planet"></div>
+      </section>
+    </div>
+    <div class="instruments">
+      <section class="instrument" aria-labelledby="study-title">
+        <div class="instrument-head">
+          <h2 id="study-title">Orbit study</h2>
+          <button class="overlay-toggle sweeps-toggle" type="button" id="toggle-sweeps" aria-pressed="true" title="Toggle equal-time sectors (S)">Area sweeps</button>
+        </div>
+        <p id="study-empty" class="empty-study" hidden>The Sun sits at the focus. Select a planet to study its orbit.</p>
+        <div id="study-data">
+          <div class="instrument-subject"><strong id="study-body">Earth</strong><span id="study-speed"></span>
+            <button id="frame-orbit" class="frame-orbit" type="button" aria-pressed="false" title="Frame the selected orbit (V)"><span class="ico ico-target" aria-hidden="true"></span><span id="frame-text">Frame orbit</span></button>
+          </div>
+          <div class="apsis-pair">
+            <button class="apsis perihelion" id="visit-perihelion" type="button">
+              <span class="apsis-caption" id="perihelion-label">Next perihelion</span>
+              <strong id="perihelion-distance"></strong>
+              <span class="event-time" id="perihelion-date"></span>
+            </button>
+            <button class="apsis aphelion" id="visit-aphelion" type="button">
+              <span class="apsis-caption" id="aphelion-label">Next aphelion</span>
+              <strong id="aphelion-distance"></strong>
+              <span class="event-time" id="aphelion-date"></span>
+            </button>
+          </div>
+          <p class="instrument-note" id="sweep-duration"></p>
+        </div>
+      </section>
+      <section class="instrument" aria-labelledby="range-title">
+        <div class="instrument-head">
+          <h2 id="range-title">Signal range</h2>
+          <button class="overlay-toggle link-toggle" type="button" id="toggle-link" aria-pressed="false" title="Toggle the signal path (M)">Map link</button>
+        </div>
+        <div class="range-pair">
+          <strong id="range-from">Earth</strong><span class="route-arrow" aria-hidden="true">→</span>
+          <label class="sr-only" for="range-target">Signal destination</label><select id="range-target"></select>
+          <button id="frame-pair" class="frame-orbit" type="button" aria-pressed="false" title="Track both bodies (P)"><span class="ico ico-target" aria-hidden="true"></span><span id="pair-text">Frame pair</span></button>
+        </div>
+        <dl class="range-values">
+          <div><dt>Separation</dt><dd id="range-distance"></dd></div>
+          <div><dt>One-way light time</dt><dd id="range-delay"></dd></div>
+          <div><dt>Range rate</dt><dd id="range-rate"></dd></div>
+        </dl>
+        <p class="instrument-note">Measured between centers at the displayed time. A positive range rate means the bodies are moving apart.</p>
+        <div class="range-tools">
+          <button type="button" id="encounter-open" class="planner-open" aria-haspopup="dialog" aria-controls="encounter-dialog" title="Open the encounter planner (E)">Encounter planner <span aria-hidden="true">↗</span></button>
+          <label for="trail-span">Motion trails <select id="trail-span" title="Lookback for the selected pair">
+            <option value="off">Off</option><option value="7">7 days</option><option value="30">30 days</option><option value="quarter">¼ inner orbit</option>
+          </select></label>
+        </div>
+      </section>
+    </div>
+    <footer class="page-footer"><span><i class="scale-mark" aria-hidden="true"></i>Body sizes and orbital spacing are illustrative.</span><span>Keplerian orbits <b>·</b> J2000 elements</span></footer>
+  </main>
+
+  <dialog id="controls-dialog" aria-labelledby="controls-title">
+    <div class="dialog-head"><h2 id="controls-title">Controls</h2><button id="help-close" type="button" aria-label="Close controls"><span class="ico ico-close" aria-hidden="true"></span></button></div>
+    <p>Choose a body on the map or in the planet index. Follow it to travel alongside its orbit.</p>
+    <dl class="help-rows">
+      <div><dt>Orbit the camera</dt><dd>Drag or arrow keys</dd></div>
+      <div><dt>Zoom</dt><dd>Scroll, pinch or <kbd>+</kbd> <kbd>−</kbd></dd></div>
+      <div><dt>Pause / resume</dt><dd><kbd>Space</kbd></dd></div>
+      <div><dt>Decrease / increase speed</dt><dd><kbd>[</kbd> <kbd>]</kbd></dd></div>
+      <div><dt>Reverse time</dt><dd><kbd>R</kbd></dd></div>
+      <div><dt>Set a UTC date and time</dt><dd>Click the date or <kbd>T</kbd></dd></div>
+      <div><dt>Open the local sky and eyepiece</dt><dd>Observatory or <kbd>H</kbd></dd></div>
+      <div><dt>Step back / forward one day</dt><dd><kbd>,</kbd> <kbd>.</kbd></dd></div>
+      <div><dt>Select a planet</dt><dd><kbd>1</kbd> – <kbd>8</kbd></dd></div>
+      <div><dt>Follow selected body</dt><dd>Double-click or <kbd>F</kbd></dd></div>
+      <div><dt>Frame the selected orbit</dt><dd>Frame orbit or <kbd>V</kbd></dd></div>
+      <div><dt>Track both signal endpoints</dt><dd>Frame pair or <kbd>P</kbd></dd></div>
+      <div><dt>Plan and save encounters</dt><dd>Encounter planner or <kbd>E</kbd></dd></div>
+      <div><dt>Reset system view</dt><dd><kbd>0</kbd></dd></div>
+      <div><dt>Orbital paths / labels</dt><dd><kbd>O</kbd> <kbd>L</kbd></dd></div>
+      <div><dt>Area sweeps / signal link</dt><dd><kbd>S</kbd> <kbd>M</kbd></dd></div>
+      <div><dt>Exit expanded or focused view</dt><dd><kbd>Esc</kbd></dd></div>
+    </dl>
+    <p class="help-note">One day per second advances the simulation by one Earth day every real second. Distances in AU use the mean Earth–Sun separation as one unit.</p>
+    <p class="help-note">In Orbit study, choose an apsis to pause there. The two colored sectors each cover one twelfth of a revolution in time. In Signal range, choose a destination and turn on Map link to see the connection.</p>
+    <p class="help-note">Follow Earth to see the Moon orbit. Select the Moon to open its eyepiece. In the observatory, choose a station and target, then move the time slider or select a rise, transit or set. Choose Use time in atlas to pause the main clock at that instant.</p>
+    <p class="help-note">In Signal range, Frame pair keeps both endpoints in view. Motion trails mark six equal time intervals into the past. Open the encounter planner to scrub their separation, select a turning point, or save a field note. Visit in atlas applies the previewed pair and pauses at its exact time.</p>
+  </dialog>
+  <dialog id="time-dialog" aria-labelledby="time-title">
+    <div class="dialog-head"><h2 id="time-title">Simulation time</h2><button id="time-close" type="button" aria-label="Close time navigator"><span class="ico ico-close" aria-hidden="true"></span></button></div>
+    <form id="time-form" novalidate>
+      <label for="time-input">Date and time (UTC)</label>
+      <input id="time-input" type="datetime-local" min="0001-01-01T00:00" max="9999-12-31T23:59" step="60" required aria-describedby="time-error">
+      <p id="time-error" role="alert" hidden>Enter a valid UTC date and minute, from year 0001 through 9999.</p>
+      <button class="time-submit" type="submit">Jump and pause</button>
+    </form>
+    <div class="day-steps" aria-label="Step from the current simulation time">
+      <button type="button" id="step-back">−1 day <kbd>,</kbd></button>
+      <button type="button" id="step-ahead">+1 day <kbd>.</kbd></button>
+    </div>
+  </dialog>
+  <dialog id="observatory-dialog" aria-labelledby="observatory-title">
+    <div class="dialog-head"><h2 id="observatory-title">Observatory</h2><button id="sky-close" type="button" aria-label="Close observatory"><span class="ico ico-close" aria-hidden="true"></span></button></div>
+    <div class="observatory-selects">
+      <label for="sky-site">Station<select id="sky-site"></select></label>
+      <label for="sky-target">Target<select id="sky-target"></select></label>
+    </div>
+    <div class="observing-grid">
+      <section class="finder-panel" aria-labelledby="finder-title">
+        <div class="instrument-head"><h3 id="finder-title">Local sky</h3><span id="sky-light"></span></div>
+        <div class="compass">
+          <span class="north" aria-hidden="true">N</span><span class="east" aria-hidden="true">E</span>
+          <span class="south" aria-hidden="true">S</span><span class="west" aria-hidden="true">W</span>
+          <div class="sky-disk" id="sky-map" role="group" aria-label="Targets above the horizon, north up and east left">
+            <i class="alt-ring ring-thirty" aria-hidden="true"><span>30°</span></i>
+            <i class="alt-ring ring-sixty" aria-hidden="true"><span>60°</span></i>
+          </div>
+        </div>
+        <p id="sky-visible"></p>
+      </section>
+      <section class="eyepiece-panel" aria-labelledby="eyepiece-title">
+        <div class="instrument-head"><h3 id="eyepiece-title">Eyepiece</h3><span>Celestial north up</span></div>
+        <div class="eyepiece-well" id="eyepiece-well">
+          <canvas id="eyepiece" role="img" aria-label="Target as seen from the station"></canvas>
+          <p id="eyepiece-error" hidden>WebGL is unavailable. Phase and position are listed below.</p>
+        </div>
+        <dl class="sky-facts">
+          <div><dt>Illuminated</dt><dd id="sky-phase"></dd><dd id="sky-phase-name" hidden></dd></div>
+          <div><dt>Angular diameter</dt><dd id="sky-size"></dd></div>
+          <div><dt>Altitude</dt><dd id="sky-alt"></dd></div>
+          <div><dt>Bearing</dt><dd id="sky-az"></dd></div>
+          <div class="elongation"><dt>Angle from Sun</dt><dd id="sky-elongation"></dd></div>
+        </dl>
+      </section>
+    </div>
+    <section class="observing-day" aria-labelledby="planner-title">
+      <div class="plan-head"><h3 id="planner-title">Altitude through the day</h3>
+        <div class="day-nav"><button id="sky-prev" type="button" aria-label="Previous observing day"><span class="ico ico-prev" aria-hidden="true"></span></button>
+          <span id="sky-date"></span><button id="sky-next" type="button" aria-label="Next observing day"><span class="ico ico-next" aria-hidden="true"></span></button>
+        </div>
+      </div>
+      <label class="sky-time-label" for="sky-minute"><span>Preview time</span><output for="sky-minute" id="sky-time"></output></label>
+      <div class="altitude-strip">
+        <div class="altitude-fill" id="altitude-fill"></div>
+        <span class="horizon-zero" aria-hidden="true">0°</span>
+        <div class="altitude-cursor" id="altitude-cursor"></div>
+        <input type="range" id="sky-minute" min="0" max="1439" step="1" value="480" aria-describedby="plan-note">
+      </div>
+      <div class="hour-ticks" id="hour-ticks" aria-hidden="true"></div>
+      <div class="sky-events" id="sky-events" role="group" aria-label="Preview today's horizon and upper meridian crossings"></div>
+      <p id="plan-note"></p>
+    </section>
+    <div class="observatory-footer"><p>Previewing station time. Applying it pauses the simulation.</p><button type="button" id="sky-apply" class="time-submit">Use time in atlas</button></div>
+  </dialog>
+  <dialog id="encounter-dialog" aria-labelledby="encounter-title">
+    <div class="dialog-head"><h2 id="encounter-title">Encounter planner</h2><button id="encounter-close" type="button" aria-label="Close encounter planner"><span class="ico ico-close" aria-hidden="true"></span></button></div>
+    <div class="observatory-selects encounter-selects">
+      <label for="encounter-from">First body<select id="encounter-from"></select></label>
+      <label for="encounter-to">Second body<select id="encounter-to"></select></label>
+    </div>
+    <section class="encounter-plot" aria-labelledby="separation-title">
+      <div class="plan-head"><h3 id="separation-title">Separation through time</h3><div class="window-nav">
+        <button id="encounter-prev" type="button" aria-label="Earlier encounter window">‹ Earlier</button>
+        <button id="encounter-next" type="button" aria-label="Later encounter window">Later ›</button>
+      </div></div>
+      <div class="distance-chart">
+        <div class="distance-axis" aria-hidden="true"><span id="encounter-high"></span><span id="encounter-low"></span></div>
+        <div class="distance-plot">
+          <div id="encounter-fill"></div><div id="encounter-line"></div><div id="encounter-guide"></div><i id="encounter-dot"></i>
+          <label class="sr-only" for="encounter-cursor">Preview an encounter date</label>
+          <input type="range" id="encounter-cursor" min="0" max="1000" step="1" value="0" aria-describedby="encounter-instructions">
+        </div>
+        <div class="distance-dates" aria-hidden="true"><span id="window-start"></span><span id="window-end"></span></div>
+      </div>
+      <div class="encounter-readout"><strong id="encounter-range"></strong><span id="encounter-rate"></span><time id="encounter-time"></time></div>
+    </section>
+    <p class="instrument-note" id="encounter-instructions">Browse one mean encounter cycle at a time. Drag the chart or choose a turning point to preview its UTC time.</p>
+    <div id="encounter-events" class="encounter-events" role="group" aria-label="Separation turning points"></div>
+    <p class="instrument-note" id="encounter-empty" hidden>No turning point falls in this window.</p>
+    <details id="field-log" class="field-log">
+      <summary>Field notes <span id="note-count"></span></summary>
+      <form id="note-form">
+        <label class="sr-only" for="note-name">Observation name (optional)</label>
+        <input id="note-name" type="text" maxlength="60" placeholder="Observation name (optional)">
+        <button type="submit" class="note-save">Save preview</button>
+      </form>
+      <ul id="note-list" aria-label="Saved observations"></ul>
+      <p id="note-status" role="status"></p>
+    </details>
+    <div class="observatory-footer"><p>Visiting sets both signal endpoints and pauses the clock.</p><button type="button" id="encounter-apply" class="time-submit">Visit in atlas</button></div>
+  </dialog>
+  <div class="sr-only" id="announcer" aria-live="polite"></div>
+</body>
+</html>

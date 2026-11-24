@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f4ed">
+  <title>Rule Atlas · Elementary cellular automata</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="automaton.js" defer></script>
+  <script src="analysis.js" defer></script>
+  <script src="workbench.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="mast-inner">
+      <div class="identity">
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <h1>Rule Atlas</h1>
+        <span class="subtitle">Elementary cellular automata</span>
+      </div>
+      <button class="export" id="save" type="button"><span aria-hidden="true">↓</span> Save SVG</button>
+    </div>
+  </header>
+  <noscript>Enable JavaScript to use the visual explorer, or run <code>node explore.js -i</code> in a terminal.</noscript>
+  <main class="layout">
+    <aside class="sidebar" aria-label="Simulation settings">
+      <form id="settings" novalidate>
+        <h2>Configuration</h2>
+        <div class="group">
+          <div class="label-row"><label for="rule">Rule number</label><small>0–255</small></div>
+          <div class="stepper">
+            <button id="rule-down" type="button" aria-label="Previous rule">−</button>
+            <input id="rule" type="number" min="0" max="255" step="1" value="90" required>
+            <button id="rule-up" type="button" aria-label="Next rule">+</button>
+          </div>
+          <div class="presets" role="group" aria-label="Example rules">
+            <button type="button" data-rule="30">30</button>
+            <button type="button" data-rule="90">90</button>
+            <button type="button" data-rule="110">110</button>
+            <button type="button" data-rule="184">184</button>
+          </div>
+        </div>
+        <div class="group">
+          <label for="seed">Starting row</label>
+          <select id="seed" aria-describedby="seed-help">
+            <option value="single">Single cell</option>
+            <option value="alternating">Alternating cells</option>
+            <option value="random">Seeded random</option>
+            <option value="campus">Campus trio</option>
+            <option value="custom">Custom pattern</option>
+          </select>
+          <div id="custom-tools" class="subfield" hidden>
+            <label for="pattern">Binary pattern</label>
+            <input id="pattern" type="text" value="10101" maxlength="512" spellcheck="false" autocomplete="off">
+          </div>
+          <div id="random-tools" class="subfield" hidden>
+            <label for="key">Random key</label>
+            <input id="key" type="number" min="0" max="4294967295" step="1" value="42">
+          </div>
+          <p class="hint" id="seed-help">One live cell in the middle of the first row.</p>
+        </div>
+        <div class="group grid-settings">
+          <div class="size-fields">
+            <div><label for="width">Cells per row</label><input id="width" type="number" min="1" max="512" value="127" required></div>
+            <div><label for="rows">Rows</label><input id="rows" type="number" min="1" max="512" value="64" required></div>
+          </div>
+          <label for="boundary">Boundary</label>
+          <select id="boundary">
+            <option value="fixed">Fixed · outside off</option>
+            <option value="fixed-on">Fixed · outside on</option>
+            <option value="wrap">Wrap around</option>
+          </select>
+        </div>
+        <button type="submit" class="apply">Apply settings</button>
+        <p id="error" class="error" role="alert" hidden></p>
+      </form>
+    </aside>
+    <div class="workspace">
+      <section aria-labelledby="rule-title">
+        <div class="plot-heading">
+          <div class="rule-title"><h2 id="rule-title">Rule 90</h2><span id="binary" class="binary"></span></div>
+          <span class="dimensions" id="dimensions"></span>
+        </div>
+        <figure class="plot-card">
+          <div class="plot-surface">
+            <canvas id="diagram" width="127" height="64" role="img" aria-label="Cellular automaton diagram"></canvas>
+          </div>
+          <figcaption>
+            <span>Seed at the top · time runs down</span>
+            <span class="cell-key"><i class="on"></i>On <i class="off"></i>Off</span>
+          </figcaption>
+          <div class="transport">
+            <div class="transport-buttons">
+              <button id="rewind" type="button" aria-label="Go to seed" title="Go to seed"><span class="icon-first" aria-hidden="true"></span></button>
+              <button class="play" id="play" type="button"><span id="play-icon" class="icon-play" aria-hidden="true"></span><span id="play-label">Play</span></button>
+              <button id="step" type="button" aria-label="Next generation" title="Next generation"><span class="icon-step" aria-hidden="true"></span></button>
+            </div>
+            <div class="timeline">
+              <label for="scrub">Generation <output id="position" for="scrub"></output></label>
+              <input id="scrub" type="range" min="0" max="63" value="63">
+            </div>
+            <div class="rate">
+              <label for="speed">Speed</label>
+              <select id="speed"><option value="2">2 rows/s</option><option value="8" selected>8 rows/s</option><option value="24">24 rows/s</option></select>
+            </div>
+          </div>
+        </figure>
+        <div class="row-readout">
+          <p class="population" id="population"></p>
+          <p id="activity"></p>
+        </div>
+        <div class="cycle-readout">
+          <div>
+            <h3>Repetition in this run</h3>
+            <p id="cycle-summary"></p>
+          </div>
+          <button id="go-repeat" type="button" hidden>Go to first repeat</button>
+        </div>
+        <details id="parents" class="inspection">
+          <summary>Predecessors of generation <span id="parent-generation"></span></summary>
+          <p id="parent-count"></p>
+          <p id="parent-help">Choose a seed to recreate the selected row at generation 1.</p>
+          <ul id="parent-seeds" aria-label="Example predecessor seeds"></ul>
+        </details>
+        <details id="damage" class="inspection">
+          <summary>What changes if one seed cell flips?</summary>
+          <form id="damage-form" class="tool-controls" novalidate>
+            <div><label for="damage-cell">Seed cell (0 is leftmost)</label>
+              <input id="damage-cell" type="number" min="0" step="1" required></div>
+            <button type="submit">Compare</button>
+          </form>
+          <p id="damage-error" class="error" role="alert" hidden></p>
+          <figure class="difference-figure">
+            <div class="difference-surface"><canvas id="damage-diagram" role="img" aria-label="Cell differences"></canvas></div>
+            <figcaption><span class="cell-key"><i class="different"></i>Different between runs</span></figcaption>
+          </figure>
+          <p class="tool-result" id="damage-count"></p>
+          <p id="damage-agreement"></p>
+          <button id="use-flip" type="button">Use flipped seed</button>
+        </details>
+        <details id="inference" class="inspection">
+          <summary>Which rules fit the observations?</summary>
+          <form id="inference-form" novalidate>
+            <label for="observations">Observed rows</label>
+            <textarea id="observations" rows="2" wrap="off" spellcheck="false" aria-describedby="observation-help"></textarea>
+            <p id="observation-help">Leave blank to follow the timeline, or enter consecutive binary rows, one per line. The applied boundary sets their edges.</p>
+            <button type="submit">Find matching rules</button>
+          </form>
+          <p id="inference-error" class="error" role="alert" hidden></p>
+          <p id="evidence-source" class="tool-result"></p>
+          <div class="evidence"><span>Outputs from 111 to 000</span> <code id="evidence-bits"></code></div>
+          <p>? means unseen. ! marks a conflicting output.</p>
+          <p id="candidate-count" class="tool-result"></p>
+          <div id="candidate-controls" class="tool-controls">
+            <div><label for="candidate">Compatible rule</label><select id="candidate"></select></div>
+            <button id="try-rule" type="button">Explore rule</button>
+          </div>
+        </details>
+        <details id="basins" class="inspection">
+          <summary>Map all seeds to their cycles</summary>
+          <form id="basin-form" class="tool-controls" novalidate>
+            <div><label for="basin-width">Map width (1–12 cells)</label>
+              <input id="basin-width" type="number" min="1" max="12" step="1" required></div>
+            <button type="submit">Map basins</button>
+          </form>
+          <p id="basin-error" class="error" role="alert" hidden></p>
+          <p id="basin-count" class="tool-result"></p>
+          <label for="basin-rank">Basin by size <output id="basin-position" for="basin-rank"></output></label>
+          <input id="basin-rank" type="range" min="1" max="1" value="1">
+          <dl class="basin-metrics">
+            <div><dt>Cycle seed</dt><dd id="cycle-seed"></dd></div>
+            <div><dt>Period</dt><dd id="basin-period"></dd></div>
+            <div><dt>Seeds in basin</dt><dd id="basin-size"></dd></div>
+            <div><dt>Max steps to cycle</dt><dd id="basin-depth"></dd></div>
+          </dl>
+          <p>The example starts at the greatest distance from this cycle.</p>
+          <button id="use-basin" type="button">Run example seed</button>
+        </details>
+      </section>
+      <section class="table-section" aria-labelledby="table-title">
+        <h2 id="table-title">Neighbourhood table</h2>
+        <p>Three cells determine the cell below their centre. Select an output to flip its bit.</p>
+        <div class="bits" id="bits" role="group" aria-label="Rule outputs in binary order"></div>
+      </section>
+      <section class="table-section" aria-labelledby="family-title">
+        <h2 id="family-title">Equivalent runs</h2>
+        <p>Transform the displayed rule, seed and boundary. The timeline stays at the selected generation.</p>
+        <div class="family">
+          <button type="button" id="mirror">Mirror left/right <span id="mirror-rule"></span></button>
+          <button type="button" id="invert">Swap on/off <span id="invert-rule"></span></button>
+          <button type="button" id="both">Mirror and swap <span id="both-rule"></span></button>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

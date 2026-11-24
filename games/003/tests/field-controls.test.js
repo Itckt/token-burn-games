@@ -1,0 +1,218 @@
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const {boot, deps} = require('./harness/page');
+const {recordingGL} = require('./harness/gl');
+const B = deps.battle, C = deps.coils;
+
+function chooseFreight(p) {
+  p.click('match-setup');
+  const menu = p.byId('setup-mode');
+  menu.value = 'freight';
+  menu.emit('change');
+  assert.match(p.byId('setup-brief').textContent,/two deliveries/);
+  p.click('dialog-done');
+  p.frame();
+}
+function keyPlay(p, pattern) {
+  const menu = p.byId('replay-moment');
+  const option = menu.children.find(o => pattern.test(o.textContent));
+  assert.ok(option,'missing play ' + pattern);
+  menu.value = option.value;
+  menu.emit('change');
+  p.frame();
+  return option.value;
+}
+
+test('coil targeting works by touch in either camera, including a tap with no preceding hover', () => {
+  for (const tactical of [true,false]) {
+    const p = boot({reduced:true}), field = p.byId('field');
+    assert.equal(p.byId('coil-toggle').disabled,true);
+    p.key('f');
+    assert.equal(p.match.phase,'ready');
+    p.key('q');
+    if (tactical) { p.key('v'); p.frame(); }
+    p.click('coil-toggle');
+    assert.equal(p.byId('coil-toggle').getAttribute('aria-pressed'),'true');
+    assert.equal(p.byId('coil-sockets').hidden,false);
+    field.emit('pointermove',p.point(C.SOCKETS[0],B.LANES[0]));
+    assert.equal(p.renderer.previewCard,null);
+    assert.equal(p.renderer.hover,0);
+    assert.equal(p.renderer.previewSocket,0);
+    field.emit('click',p.point(0,0));
+    assert.equal(p.match.coils.fields[0],null);
+    field.emit('click',p.point(4.3,B.LANES[1]));
+    assert.equal(p.match.coils.fields[0].socket,2);
+    assert.equal(p.match.coils.fields[0].lane,1);
+    assert.deepEqual(p.match.deployed,[1,0]);
+    assert.equal(p.byId('energy-number').textContent,'3');
+    assert.equal(p.byId('coil-sockets').hidden,true);
+    assert.equal(p.renderer.previewCard,'strider');
+    assert.equal(p.byId('coil-status').textContent,'Arming B');
+    p.key('f');
+    assert.match(p.byId('notice').textContent,/recharging/);
+  }
+});
+
+test('socket buttons and shortcuts agree, cancel cleanly and respect pauses, dialogs and energy', () => {
+  const p = boot();
+  p.key('q');
+  p.key('f');
+  p.key('ArrowLeft');
+  p.key('ArrowLeft');
+  assert.equal(p.byId('socket-home').getAttribute('aria-pressed'),'true');
+  p.key('Escape');
+  assert.equal(p.byId('coil-sockets').hidden,true);
+  p.key('f');
+  p.key('3');
+  assert.equal(p.byId('deploy-name').textContent,'Prism Wasp');
+  assert.equal(p.byId('coil-sockets').hidden,true);
+  p.key('f');
+  p.click('help-button');
+  assert.match(p.byId('dialog-content').textContent,/Home, Center or Away/);
+  assert.equal(p.match.phase,'paused');
+  assert.equal(p.key('e').defaultPrevented,false);
+  p.click('dialog-done');
+  assert.equal(p.byId('coil-sockets').hidden,true);
+  p.key('f');
+  p.click('socket-away');
+  p.key('ArrowLeft');
+  assert.equal(p.renderer.previewSocket,1);
+  p.byId('lane-a').emit('focus');
+  assert.equal(p.renderer.hover,0);
+  p.click('lane-a');
+  assert.equal(p.match.coils.fields[0].socket,1);
+  assert.equal(p.match.coils.fields[0].lane,0);
+  assert.equal(p.byId('deploy-name').textContent,'Prism Wasp');
+  p.click('history-button');
+  assert.match(p.byId('dialog-content').textContent,/set a snare coil in Lane A/);
+  assert.match(p.byId('dialog-content').textContent,/Machines snared/);
+  const poor = boot();
+  poor.key('4');
+  poor.key('q');
+  poor.key('1');
+  poor.key('e');
+  poor.key('f');
+  assert.equal(poor.byId('coil-toggle').disabled,true);
+  assert.match(poor.byId('notice').textContent,/Need 2 energy/);
+  assert.equal(poor.renderer.previewSocket,null);
+});
+
+test('arming under a stationary pointer and switching cameras keeps the preview on the socket a tap will use', () => {
+  const p = boot({reduced:true}), field = p.byId('field');
+  p.key('q');
+  const cursor = p.point(-2.1,B.LANES[0]);
+  field.emit('pointermove',cursor);
+  p.key('f');
+  assert.equal(p.renderer.previewSocket,0);
+  assert.equal(p.byId('deploy-name').textContent,'Home socket');
+  p.key('v');
+  p.frame();
+  assert.equal(p.renderer.previewSocket,1);
+  assert.equal(p.byId('deploy-name').textContent,'Center socket');
+  field.emit('click',cursor);
+  assert.equal(p.match.coils.fields[0].socket,1);
+});
+
+test('freight scores and accessible track positions follow the match and reset when switching formats', () => {
+  const p = boot();
+  chooseFreight(p);
+  assert.equal(p.byId('time').textContent,'01:15');
+  assert.equal(p.byId('freight-strip').hidden,false);
+  assert.equal(p.byId('signal-strip').hidden,true);
+  assert.equal(p.byId('objective-name').textContent,'Freight Shift');
+  assert.equal(p.byId('score-player').title,'Your deliveries');
+  const s = p.match, [row] = p.byId('freight-strip').children, meter = row.children[1];
+  assert.equal(meter.getAttribute('aria-valuenow'),'0');
+  p.key('q');
+  s.objective.carts[0].x = deps.freight.DOCK/2;
+  s.objective.carts[0].escorts[0] = 2;
+  s.objective.score[0] = 1;
+  p.key('p');
+  assert.equal(p.byId('score-player').textContent,'1');
+  assert.equal(meter.getAttribute('aria-valuenow'),'50');
+  assert.match(meter.getAttribute('aria-valuetext'),/toward Vanta · You push/);
+  assert.deepEqual(s.destroyed,[0,0]);
+  p.click('overlay-second');
+  p.click('match-setup');
+  p.byId('setup-mode').value = 'escort';
+  p.click('dialog-done');
+  assert.equal(p.byId('signal-strip').hidden,false);
+  assert.equal(p.byId('freight-strip').hidden,true);
+  assert.equal(p.byId('objective-meter').hidden,false);
+  assert.equal(p.byId('score-player').title,'Enemy relays destroyed');
+});
+
+test('a key play opens at its exact tick, offers a playable lead-in and survives returning from practice', () => {
+  const p = boot();
+  chooseFreight(p);
+  p.key('2');
+  p.key('q');
+  p.advance(4,250);
+  p.key('z');
+  p.advance(310,250);
+  assert.equal(p.match.phase,'ended');
+  const final = p.match, finalState = JSON.stringify(final);
+  p.click('watch-replay');
+  p.frame();
+  assert.equal(p.byId('replay-lead').disabled,true);
+  keyPlay(p,/You guarded/);
+  assert.ok(Number(p.byId('replay-seek').value) < 60);
+  p.click('replay-lead');
+  assert.equal(p.byId('replay-seek').value,'0');
+  const index = keyPlay(p,/delivered the Lane [AB] cart/);
+  const tick = Number(p.byId('replay-seek').value);
+  assert.equal(p.byId('phase-text').textContent,'REPLAY PAUSED');
+  assert.equal(p.match.objective.score.reduce((a,b) => a+b),1);
+  const select = p.byId('replay-moment');
+  assert.equal(p.key('q',{target:select}).defaultPrevented,false,'native select keeps its keys');
+  p.click('replay-lead');
+  p.frame();
+  assert.equal(p.byId('replay-seek').value,String(tick-60));
+  assert.deepEqual(p.match.objective.score,[0,0]);
+  const position = JSON.stringify(p.match);
+  p.click('take-over');
+  p.frame();
+  p.key('f');
+  p.key('e');
+  assert.ok(p.match.coils.fields[0]);
+  p.advance(310,250);
+  p.click('watch-replay');
+  assert.ok(p.byId('replay-moment').children.some(o => /Practice position/.test(o.textContent)));
+  p.click('return-original');
+  p.frame();
+  assert.equal(p.byId('replay-moment').value,index);
+  assert.equal(p.byId('replay-seek').value,String(tick-60));
+  assert.equal(JSON.stringify(p.match),position);
+  keyPlay(p,/won the match|Match drawn/);
+  assert.equal(p.byId('phase-text').textContent,'REPLAY END');
+  assert.equal(p.byId('take-over').disabled,true);
+  p.click('replay-lead');
+  assert.equal(p.byId('take-over').disabled,false);
+  p.click('exit-replay');
+  p.frame();
+  assert.equal(p.match,final);
+  assert.equal(JSON.stringify(final),finalState);
+});
+
+test('the local HTML entry recovers into Freight Shift, renders both rails and accepts a coil order', () => {
+  const options = {entry:true}, p = boot(options);
+  chooseFreight(p);
+  assert.equal(p.byId('overlay-title').textContent,'WebGL is unavailable');
+  assert.ok(p.byId('coil-toggle').disabled);
+  const g = recordingGL();
+  options.gl = g.gl;
+  p.click('overlay-main');
+  p.frame();
+  p.key('q');
+  p.key('f');
+  p.click('socket-away');
+  p.click('lane-b');
+  const count = g.uploads.length;
+  p.advance(3);
+  assert.match(p.byId('feed-message').textContent,/set a snare coil in Lane B/);
+  assert.equal(p.byId('energy-number').textContent,'3');
+  assert.equal(p.byId('objective-name').textContent,'Freight Shift');
+  assert.equal(g.uploads.length,count);
+  assert.equal(g.draws.at(-1).framebuffer,null);
+});

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173c33">
+  <title>Street Cantonese · Cantonese slang dictionary</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="entries.js"></script>
+  <script defer src="lookup.js"></script>
+  <script defer src="passage.js"></script>
+  <script defer src="phrasebook.js"></script>
+  <script defer src="dictionary.js"></script>
+  <script defer src="quiz-view.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="masthead">
+    <div class="wrap masthead-inner">
+      <div class="wordmark"><span class="seal" lang="yue-Hant">街談</span> Street Cantonese</div>
+      <nav aria-label="Study tools">
+        <button id="nav-dictionary" type="button" aria-pressed="true" aria-controls="dictionary-view">Dictionary</button>
+        <button id="nav-reader" type="button" aria-pressed="false" aria-controls="reader-view">Reader</button>
+        <button id="nav-quiz" type="button" aria-pressed="false" aria-controls="quiz-view">Quiz</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <noscript><p>This page needs JavaScript. The same dictionary is available in the terminal with <code>node cli.js</code>.</p></noscript>
+    <section id="dictionary-view" aria-labelledby="dictionary-title">
+      <h1 id="dictionary-title">Cantonese slang dictionary</h1>
+      <div class="lookup-bar">
+        <label class="search-box" for="search">
+          <span class="magnifier" aria-hidden="true"></span>
+          <span id="search-label" class="sr-only">Search Chinese, Jyutping, or English</span>
+          <input id="search" type="search" placeholder="Search Chinese, Jyutping, or English" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="topic-filter" for="search-scope">Search in
+          <select id="search-scope"></select>
+        </label>
+      </div>
+      <div class="lookup-filters">
+        <label class="topic-filter" for="dictionary-topic">Topic
+          <select id="dictionary-topic"></select>
+        </label>
+        <label class="book-filter" for="dictionary-saved">
+          <input id="dictionary-saved" type="checkbox"> Phrasebook only <span id="book-count"></span>
+        </label>
+      </div>
+      <details class="book-transfer">
+        <summary>Import or export a phrasebook</summary>
+        <label for="book-list">One expression per line</label>
+        <p id="book-list-help">Paste headwords or complete readings to add them to your book. Export selects your saved headwords for copying.</p>
+        <textarea id="book-list" rows="4" spellcheck="false" aria-describedby="book-list-help transfer-status"></textarea>
+        <div class="summary-actions">
+          <button id="book-import" class="primary" type="button">Import list</button>
+          <button id="book-export" class="text-button" type="button">Export saved words</button>
+        </div>
+        <p id="transfer-status" role="status"></p>
+      </details>
+      <p id="book-note" role="status" hidden>Phrasebook storage is unavailable. Changes will last for this page session.</p>
+      <div class="dictionary-grid">
+        <section class="index" aria-labelledby="index-title">
+          <header class="index-header">
+            <h2 id="index-title">Expression index</h2>
+            <span id="result-count" role="status"></span>
+          </header>
+          <div id="results" class="result-list"></div>
+        </section>
+
+        <article id="entry-card" class="sheet" aria-labelledby="entry-term">
+          <header class="entry-head">
+            <p id="entry-topic" class="topic-name"></p>
+            <h2 id="entry-term" lang="yue-Hant" tabindex="-1"></h2>
+            <p id="entry-reading" lang="yue-Latn" class="entry-reading"></p>
+            <button id="toggle-save" class="bookmark" type="button">Save to phrasebook</button>
+          </header>
+          <div class="entry-body">
+            <h3 id="entry-meaning"></h3>
+            <p id="entry-note"></p>
+            <figure class="example">
+              <figcaption>In a sentence</figcaption>
+              <p id="example-zh" class="example-zh" lang="yue-Hant"></p>
+              <p id="example-reading" class="transcription" lang="yue-Latn"></p>
+              <p id="example-en"></p>
+            </figure>
+            <div class="entry-footer">
+              <details class="tone-key">
+                <summary>Jyutping tone key</summary>
+                <p>1 high level · 2 high rising · 3 mid level · 4 low falling · 5 low rising · 6 low level</p>
+              </details>
+              <button id="back-index" class="text-button" type="button">Back to index</button>
+            </div>
+          </div>
+        </article>
+        <section id="no-results" class="sheet empty" hidden>
+          <h2 id="empty-title">No matching expressions</h2>
+          <p id="empty-hint">Try a shorter reading, an English keyword, or a different topic.</p>
+          <button id="reset-search" class="primary" type="button">Clear all filters</button>
+        </section>
+      </div>
+    </section>
+
+    <section id="reader-view" aria-labelledby="reader-title" hidden>
+      <h1 id="reader-title">Passage reader</h1>
+      <div class="sheet reader-sheet">
+        <div class="reader-tools">
+          <label for="passage">Paste a Cantonese message</label>
+          <button id="reader-sample" class="text-button" type="button">Try a sample</button>
+        </div>
+        <textarea id="passage" rows="3" lang="yue-Hant" spellcheck="false" aria-describedby="reader-status"></textarea>
+        <p id="reader-status" role="status"></p>
+        <div id="reader-results" hidden>
+          <p id="marked-passage" lang="yue-Hant"></p>
+          <ul id="reader-words" class="review-list" aria-label="Expressions in this passage"></ul>
+          <button id="reader-quiz" class="primary" type="button">Set up a passage quiz</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="quiz-view" aria-labelledby="quiz-title" hidden>
+      <h1 id="quiz-title">Slang quiz</h1>
+      <form id="quiz-setup" class="sheet quiz-sheet" novalidate>
+        <p class="setup-intro">Practise meanings and readings, write the Jyutping from memory, or fill the gaps in a Cantonese sentence.</p>
+        <div class="quiz-fields">
+          <label for="quiz-topic">Topic<select id="quiz-topic"></select></label>
+          <label for="quiz-mode">Practice mode<select id="quiz-mode"></select></label>
+          <label for="quiz-count">Questions <span id="quiz-limit" class="limit"></span>
+            <input id="quiz-count" type="number" value="5" min="1" step="1" aria-describedby="quiz-limit" required>
+          </label>
+        </div>
+        <label class="book-filter quiz-book" for="quiz-saved">
+          <input id="quiz-saved" type="checkbox"> Practise my phrasebook only
+        </label>
+        <label class="book-filter quiz-book" for="quiz-passage">
+          <input id="quiz-passage" type="checkbox"> Use expressions from the Reader <span id="quiz-passage-count"></span>
+        </label>
+        <p id="quiz-empty" class="form-note" hidden>Save an expression in this topic or change the collection to start a round.</p>
+        <p id="quiz-error" role="alert" hidden></p>
+        <button id="start-round" class="primary" type="submit">Start round</button>
+      </form>
+
+      <section id="quiz-play" class="sheet quiz-sheet" aria-labelledby="question" hidden>
+        <div class="round-meta"><span id="position"></span><span id="live-score"></span></div>
+        <progress id="progress" aria-label="Questions answered" value="0" max="5"></progress>
+        <p id="instruction"></p>
+        <h2 id="question" tabindex="-1" aria-describedby="instruction question-hint"></h2>
+        <p id="question-hint" class="transcription" lang="yue-Latn"></p>
+        <div id="choices" class="choices" role="group" aria-labelledby="instruction question"></div>
+        <form id="type-form" class="type-form" novalidate hidden>
+          <label for="typed-reading">Your Jyutping</label>
+          <div class="type-controls">
+            <input id="typed-reading" type="text" lang="yue-Latn" autocapitalize="none" autocomplete="off" spellcheck="false" aria-describedby="question instruction type-error">
+            <button id="check-reading" class="primary" type="submit">Check reading</button>
+          </div>
+          <p id="type-error" class="form-error" role="alert" hidden></p>
+        </form>
+        <div id="feedback" role="status"></div>
+        <div class="round-actions">
+          <button id="next-question" type="button" class="primary" hidden>Next question</button>
+          <button id="end-round" type="button" class="text-button">End round</button>
+        </div>
+      </section>
+
+      <section id="quiz-summary" class="sheet quiz-sheet" aria-labelledby="summary-title" hidden>
+        <h2 id="summary-title" tabindex="-1">Round complete</h2>
+        <p id="summary-score" class="summary-score"></p>
+        <p id="summary-count"></p>
+        <section id="review-block" hidden>
+          <h3>To revisit</h3>
+          <ul id="review-list" class="review-list"></ul>
+        </section>
+        <div class="summary-actions">
+          <button id="retry-missed" type="button" class="primary" hidden>Retry missed questions</button>
+          <button id="new-round" type="button" class="text-button">Set up another round</button>
+        </div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

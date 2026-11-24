@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101619">
+  <title>Nightferry — Victoria Harbour</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="js/math.js"></script>
+  <script defer src="js/mesh.js"></script>
+  <script defer src="js/tide.js"></script>
+  <script defer src="js/vessels.js"></script>
+  <script defer src="js/beacon.js"></script>
+  <script defer src="js/cargo.js"></script>
+  <script defer src="js/timehouse.js"></script>
+  <script defer src="js/cableway.js"></script>
+  <script defer src="js/quay.js"></script>
+  <script defer src="js/city.js"></script>
+  <script defer src="js/atmosphere.js"></script>
+  <script defer src="js/weather.js"></script>
+  <script defer src="js/lanterns.js"></script>
+  <script defer src="js/lookouts.js"></script>
+  <script defer src="js/flight.js"></script>
+  <script defer src="js/textures.js"></script>
+  <script defer src="js/shaders.js"></script>
+  <script defer src="js/renderer.js"></script>
+  <script defer src="js/chart.js"></script>
+  <script defer src="js/postcard.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <main class="app">
+    <header class="masthead">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><i></i><b></b></span>
+        <span class="wordmark">Nightferry</span><span class="brand-divider"></span>
+        <span class="brand-han" lang="zh-HK">夜渡</span>
+      </div>
+      <div class="header-tools">
+        <span class="live-state"><i></i><span id="render-label">LIVE RENDER</span></span>
+        <span class="tool-divider"></span>
+        <button class="header-action" id="postcard" title="Take a postcard (P)" aria-label="Take a postcard" aria-haspopup="dialog"><span class="camera-icon" aria-hidden="true"></span><span class="button-name">Postcard</span></button>
+        <button class="header-action" id="regenerate" title="Generate a new skyline (G)" aria-label="Generate a new skyline"><span class="dice" aria-hidden="true"></span><span class="button-name">New skyline</span></button>
+        <button class="fullscreen" id="fullscreen" title="Enter fullscreen (F)" aria-label="Enter fullscreen" aria-pressed="false"><span class="corners" aria-hidden="true"></span></button>
+      </div>
+    </header>
+    <section class="viewport" aria-labelledby="place">
+      <canvas id="harbour" aria-label="A red-sailed junk crosses Victoria Harbour beneath neon shop signs. Cable cars cross the rooftops behind a working quayside clock. Drag or use the arrow keys to look around." tabindex="0"></canvas>
+      <div class="scene-shade" aria-hidden="true"><i class="glass-reticle"></i></div>
+      <div class="scene-header">
+        <div class="location">
+          <div class="eyebrow"><span class="red-rule"></span>HONG KONG <span class="slash">/</span> <span class="han" lang="zh-HK">香港</span></div>
+          <h1 id="place">Victoria <em>Harbour</em></h1>
+          <p class="coordinates"><span class="crosshair" aria-hidden="true"></span>22°17′ N <span>·</span> 114°10′ E</p>
+        </div>
+        <div class="sky-controls" role="group" aria-label="Harbour conditions">
+          <div class="condition-control">
+            <label for="lighting">Light</label>
+            <select id="lighting" title="Time of day (T)">
+              <option value="midnight">Midnight</option>
+              <option value="blue">Blue hour</option>
+              <option value="dawn">First light</option>
+            </select>
+          </div>
+          <div class="condition-control">
+            <label for="weather">Weather</label>
+            <select id="weather" title="Harbour weather (W)">
+              <option value="moonlit">Clear</option>
+              <option value="mist">Sea mist</option>
+              <option value="squall">Rain squall</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="flight-progress">
+        <label id="deck-time" for="timeline" hidden>Ferry &amp; harbour time</label>
+        <div class="flight-readout">
+          <span class="flight-state"><i class="meter" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span id="flight-label">IN FLIGHT</span></span>
+          <span class="time"><span id="elapsed">00:00</span><span class="time-slash">/</span><span id="duration">02:00</span></span>
+        </div>
+        <input id="timeline" type="range" min="0" max="1000" step="1" value="0" aria-label="Camera route position" aria-valuetext="0 minutes, 0 seconds">
+      </div>
+      <aside class="chart" aria-label="Live harbour chart and camera lookout">
+        <div class="chart-title"><span class="chart-cross" aria-hidden="true"></span><span id="chart-caption">Harbour chart</span><span class="north">N ↑</span></div>
+        <canvas id="chart" width="336" height="136" role="img" aria-label="Live harbour chart. Tap a marker to track it, or use the Look at menu." title="Tap a marker to track it"></canvas>
+        <div class="lookout-control">
+          <label for="lookout">Look at</label>
+          <select id="lookout" title="Track a harbour subject (L)">
+            <option value="route">Route view</option>
+            <option value="wheel">Pier wheel</option>
+            <option value="tram">Quay tram</option>
+            <option value="junk">Red-sailed junk</option>
+            <option value="lanterns">Lantern show</option>
+            <option value="landing">Floating pier</option>
+            <option value="beacon">Harbour beacon</option>
+            <option value="cargo">Cargo crane</option>
+            <option value="cableway">Hill cableway</option>
+            <option value="timehouse">Time ball tower</option>
+          </select>
+        </div>
+        <output id="lookout-call" aria-live="polite" hidden></output>
+        <button id="next-event" title="Jump to the next harbour event (N)" aria-keyshortcuts="N" hidden><span id="event-label"></span><kbd aria-hidden="true">N</kbd></button>
+        <button id="glass" title="Cycle spotting glass magnification (B)" aria-keyshortcuts="B"><span>Spotting glass</span><strong id="glass-power">1×</strong></button>
+      </aside>
+      <div id="error-panel" class="error-panel" role="alert" hidden>
+        <h2 id="error-title">WebGL is unavailable</h2>
+        <p id="error-detail">Enable hardware acceleration in your browser, then reload to view the harbour.</p>
+      </div>
+      <noscript><div class="error-panel"><h2>JavaScript is required</h2><p>Enable JavaScript and reopen this file to start the flight.</p></div></noscript>
+    </section>
+    <footer class="console">
+      <div class="control-row">
+        <div class="routes-group">
+          <h2 class="label" id="route-heading">Camera route</h2>
+          <div class="routes" role="group" aria-labelledby="route-heading">
+            <button class="route active" data-route="0" aria-pressed="true"><canvas width="56" height="44" aria-hidden="true"></canvas>Harbour drift</button>
+            <button class="route" data-route="1" aria-pressed="false"><canvas width="56" height="44" aria-hidden="true"></canvas>Neon passage</button>
+            <button class="route" data-route="2" aria-pressed="false"><canvas width="56" height="44" aria-hidden="true"></canvas>Rooftop glide</button>
+            <button class="route" data-route="3" aria-pressed="false" title="Board the ferry (4). The timeline seeks the whole crossing."><canvas width="56" height="44" aria-hidden="true"></canvas>Ferry deck</button>
+          </div>
+        </div>
+        <div class="transport-group">
+          <div class="speed-group">
+            <h2 class="label" id="speed-heading">Flight speed</h2>
+            <div class="speeds" role="group" aria-labelledby="speed-heading">
+              <button data-speed="0.5" aria-pressed="false" aria-label="Half speed">0.5×</button>
+              <button class="active" data-speed="1" aria-pressed="true" aria-label="Normal speed">1×</button>
+              <button data-speed="2" aria-pressed="false" aria-label="Double speed">2×</button>
+            </div>
+          </div>
+          <button id="play" class="play" title="Pause flight (Space)"><span class="play-glyph" aria-hidden="true"></span><span id="play-label">Pause flight</span></button>
+        </div>
+      </div>
+      <div class="help">
+        <span class="drag-hint"><i class="mouse" aria-hidden="true"></i>Drag to look</span>
+        <span><kbd>Space</kbd> Play / pause</span><span><kbd>1–4</kbd> Routes</span><span><kbd>Arrows</kbd> Look</span>
+        <span><kbd>R</kbd> Recenter</span><span><kbd>S</kbd> Speed</span><span><kbd>T</kbd> Light</span><span><kbd>W</kbd> Weather</span><span><kbd>L</kbd> Lookout</span><span><kbd>B</kbd> Glass</span><span>Tap chart to track</span><span id="postcard-hint"><kbd>P</kbd> Postcard</span><span><kbd>G</kbd> New skyline</span><span id="fullscreen-hint"><kbd>F</kbd> Fullscreen</span>
+      </div>
+    </footer>
+  </main>
+  <dialog id="postcard-dialog" aria-labelledby="postcard-title">
+    <div class="postcard-heading">
+      <h2 id="postcard-title">Harbour postcard</h2>
+      <button id="close-postcard" title="Close postcard (Esc)" autofocus>Close</button>
+    </div>
+    <canvas id="postcard-preview" width="1" height="1" role="img" aria-label="Your captured view of Victoria Harbour"></canvas>
+    <div class="postcard-actions">
+      <span id="postcard-status" role="status"></span>
+      <a id="save-postcard" download hidden>Save PNG</a>
+    </div>
+  </dialog>
+</body>
+</html>

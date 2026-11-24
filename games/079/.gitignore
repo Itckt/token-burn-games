@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+/friday-filed.save.json
+/.friday-filed-*.tmp

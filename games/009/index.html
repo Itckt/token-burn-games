@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#19332d">
+  <meta http-equiv="Content-Security-Policy" content="connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Loop Foundry — Marble workshop</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="js/math.js"></script>
+  <script defer src="js/track.js"></script>
+  <script defer src="js/blueprint.js"></script>
+  <script defer src="js/mesh.js"></script>
+  <script defer src="js/replay.js"></script>
+  <script defer src="js/trials.js"></script>
+  <script defer src="js/heat.js"></script>
+  <script defer src="js/physics.js"></script>
+  <script defer src="js/camera.js"></script>
+  <script defer src="js/picking.js"></script>
+  <script defer src="js/render.js"></script>
+  <script defer src="js/icons.js"></script>
+  <script defer src="js/panels.js"></script>
+  <script defer src="js/replay-panel.js"></script>
+  <script defer src="js/build-panel.js"></script>
+  <script defer src="js/scene-input.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="identity">
+      <span class="brand-mark"><canvas data-icon="brand" aria-hidden="true"></canvas></span>
+      <span class="wordmark">Loop Foundry</span>
+      <span class="app-type">Marble workshop</span>
+    </div>
+    <nav class="top-actions" aria-label="Workshop">
+      <button class="help-button" id="help-open" aria-label="Workshop controls" title="Workshop controls (?)"><i data-icon="keyboard"></i><span>Controls</span></button>
+      <div class="menu-anchor">
+        <button class="layouts-button" id="layouts-toggle" aria-expanded="false" aria-controls="layouts-menu">
+          <i data-icon="folder"></i>Layouts<i class="tiny-icon" data-icon="down"></i>
+        </button>
+        <div class="popover layout-menu" id="layouts-menu" hidden>
+          <div class="menu-caption">Open a layout</div>
+          <button data-layout="switchback"><i data-icon="loop"></i>Kowloon Switchback</button>
+          <button data-layout="hairpin"><i data-icon="bend"></i>Golden Hairpin</button>
+          <button data-layout="relay"><i data-icon="drive"></i>Lion Rock Relay</button>
+          <button data-layout="podium"><i data-icon="jump"></i>Podium Post</button>
+          <button data-layout="empty" class="menu-split"><i data-icon="plus"></i>New blank track</button>
+          <button id="blueprint-open" aria-haspopup="dialog"><i data-icon="blueprint"></i>Track blueprints…</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="workshop">
+    <section class="stage" id="stage" aria-label="3D track editor">
+      <canvas id="scene" tabindex="0" aria-label="3D marble run. Click a piece to select it. Drag or use the arrow keys to orbit. Scroll or pinch to zoom."></canvas>
+      <div class="scene-heading">
+        <div class="eyebrow"><span></span>Track editor</div>
+        <h1 id="track-name">Kowloon Switchback</h1>
+        <div class="track-meta">
+          <span><i data-icon="pieces"></i><span id="piece-count">8 pieces</span></span>
+          <b aria-hidden="true"></b>
+          <span><i data-icon="ruler"></i><span id="track-length">64.0 m</span></span>
+        </div>
+        <div class="follow-readout" id="follow-readout" role="group" aria-label="Tracked marble" hidden>
+          <strong id="follow-runner">Release gate</strong>
+          <span id="follow-speed">0.0 m/s</span><span id="follow-height"></span>
+        </div>
+      </div>
+      <div class="history-tools tool-group">
+        <button class="icon-button" id="undo" title="Undo (Ctrl/Cmd + Z)" aria-label="Undo edit" disabled><i data-icon="undo"></i></button>
+        <button class="icon-button" id="redo" title="Redo (Ctrl/Cmd + Shift + Z)" aria-label="Redo edit" disabled><i data-icon="redo"></i></button>
+      </div>
+
+      <div class="view-corner">
+        <canvas id="axis" width="116" height="100" aria-hidden="true"></canvas>
+        <div class="menu-anchor">
+          <button class="view-button" id="view-toggle" aria-label="Camera view" aria-expanded="false" aria-controls="view-menu">
+            <i data-icon="cube"></i><span id="view-name">Isometric</span><i data-icon="down" class="tiny-icon"></i>
+          </button>
+          <div class="popover view-menu" id="view-menu" hidden>
+            <div class="menu-caption">Camera view</div>
+            <button data-view="isometric">Isometric</button>
+            <button data-view="overhead">Overhead</button>
+            <button data-view="front">Front</button>
+            <button data-view="follow" class="menu-split">Follow marble <kbd>V</kbd></button>
+          </div>
+        </div>
+      </div>
+      <div class="camera-tools tool-group">
+        <button class="icon-button" id="zoom-in" title="Zoom in (+)" aria-label="Zoom in"><i data-icon="plus"></i></button>
+        <button class="icon-button" id="zoom-out" title="Zoom out (−)" aria-label="Zoom out"><i data-icon="minus"></i></button>
+        <button class="icon-button fit-button" id="fit" title="Fit track (F)" aria-label="Fit track in view"><i data-icon="fit"></i></button>
+      </div>
+      <div class="transport" id="live-transport" role="group" aria-label="Simulation controls">
+        <button class="drop-button" id="drop"><i data-icon="drop"></i>Drop marble<kbd>Space</kbd></button>
+        <span class="transport-rule"></span>
+        <button class="icon-button" id="pause" aria-label="Pause simulation" aria-pressed="false" title="Pause simulation (P)"><i data-icon="pause"></i></button>
+        <button class="icon-button" id="clear" aria-label="Clear marbles and scores" title="Clear marbles and scores (C)"><i data-icon="reset"></i></button>
+      </div>
+      <div class="transport replay-transport" id="replay-transport" role="group" aria-label="Run replay controls" hidden>
+        <div class="replay-time"><strong id="replay-number">Replay</strong><span id="replay-time"></span></div>
+        <div class="replay-controls">
+          <button class="icon-button" id="replay-play" aria-label="Pause replay" title="Pause replay (P)"><i data-icon="pause"></i></button>
+          <input id="replay-scrub" type="range" min="0" max="1000" step="1" value="0" aria-label="Replay position">
+          <button class="back-live" id="replay-exit" title="Return to live simulation (R or Escape)">Back to live</button>
+        </div>
+      </div>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      <div id="gl-error" class="gl-error" role="alert" hidden>
+        <i data-icon="cube"></i><h2 id="error-title">WebGL is unavailable</h2>
+        <p id="error-detail">Enable hardware acceleration in your browser settings, then reload this file to open the 3D workshop.</p>
+        <button id="retry">Retry 3D view</button>
+      </div>
+      <noscript><div class="gl-error"><h2>JavaScript is required</h2><p>Enable JavaScript and reopen this file to run the marble workshop.</p></div></noscript>
+    </section>
+
+    <aside class="bench" aria-label="Track building tools">
+      <div class="bench-tabs" role="tablist" aria-label="Workshop tools">
+        <button role="tab" id="build-tab" aria-controls="build-panel" aria-selected="true">Build</button>
+        <button role="tab" id="trials-tab" aria-controls="trials-panel" aria-selected="false" tabindex="-1">Time trials</button>
+      </div>
+      <section class="library" id="build-panel" role="tabpanel" aria-labelledby="build-tab">
+        <div class="course-inspector">
+          <div class="profile-heading"><h2>Course profile</h2><span id="profile-peak"></span></div>
+          <div class="profile-plot">
+            <canvas id="course-profile" width="600" height="104" aria-hidden="true" title="Select a section by distance"></canvas>
+            <div class="profile-scale" aria-hidden="true"><span>0 m</span><span id="profile-length"></span></div>
+          </div>
+          <div class="gate-height">
+            <label for="release-height">Gate height</label>
+            <span class="height-value"><input id="release-height" type="number" inputmode="decimal" min="0.9" max="12" step="any" value="7.1" aria-label="Release gate height in metres" aria-describedby="height-error"><span aria-hidden="true">m</span></span>
+            <button id="apply-height" aria-label="Apply gate height" disabled>Apply</button>
+          </div>
+          <p id="height-error" class="height-error" role="status"></p>
+          <div class="build-position"><label for="piece-position">Build at</label>
+            <select id="piece-position" aria-describedby="build-hint"><option value="-1">Finish · append here</option></select>
+          </div>
+          <div class="piece-actions" id="piece-actions" hidden>
+            <span id="section-length"></span>
+            <button id="move-earlier" title="Move selected piece earlier">← Earlier</button>
+            <button id="move-later" title="Move selected piece later">Later →</button>
+          </div>
+        </div>
+        <div class="section-heading"><i data-icon="library"></i><h2>Piece library</h2></div>
+        <p class="section-note" id="build-hint">Choose a card to extend the track.</p>
+        <div class="piece-grid" id="piece-grid"></div>
+        <button class="remove-button" id="remove"><i data-icon="remove"></i><span id="remove-label">Remove last piece</span><kbd>⌫</kbd></button>
+      </section>
+      <section class="timing-panel" id="trials-panel" role="tabpanel" aria-labelledby="trials-tab" hidden>
+        <div class="section-heading"><i data-icon="timer"></i><h2>Timing board</h2></div>
+        <div class="stopwatch">
+          <div class="clock-heading"><span id="trial-runner">Release gate</span><span id="trial-state">Ready</span></div>
+          <div class="clock-digits"><span id="trial-clock">0.00</span><small>s</small></div>
+          <div class="split-row"><span><i data-icon="split"></i>Halfway split</span><strong id="trial-split">—</strong></div>
+          <p id="trial-gap" class="trial-gap" hidden></p>
+        </div>
+        <div class="record-row"><span>Course best</span><strong id="trial-best">—</strong></div>
+        <button id="ghost-toggle" class="ghost-toggle" aria-pressed="true" aria-describedby="ghost-hint">
+          <i data-icon="ghost"></i><span>Race best ghost</span><span class="switch" aria-hidden="true"></span>
+        </button>
+        <p class="timing-note" id="ghost-hint">Finish a run to record a ghost for your next drop.</p>
+        <h3 class="results-heading">Recent finishes</h3>
+        <ol id="trial-results" class="trial-results"><li class="empty-result">No finishes yet.</li></ol>
+        <section class="run-review" aria-labelledby="replay-heading">
+          <div class="profile-heading"><h2 id="replay-heading">Run replay</h2><span id="replay-outcome"></span></div>
+          <p class="timing-note" id="replay-hint">Drop a marble to record its run.</p>
+          <div class="replay-chart" id="replay-chart" hidden>
+            <div class="chart-heading"><span>Speed</span><strong id="replay-peak"></strong></div>
+            <div class="speed-plot"><canvas id="replay-trace" width="520" height="82" aria-hidden="true"></canvas>
+              <span id="replay-marker" hidden></span></div>
+            <div class="profile-scale"><span>0 s</span><span id="replay-split-mark"></span><span id="replay-duration"></span></div>
+          </div>
+          <button class="paper-button" id="review-run" aria-describedby="replay-hint" disabled><i data-icon="timer"></i><span id="review-action">Replay last run</span><kbd>R</kbd></button>
+        </section>
+        <section class="pace-heat" aria-labelledby="heat-title">
+          <div class="profile-heading"><h2 id="heat-title">Pace heat</h2><span id="heat-state" role="status">Lineup</span></div>
+          <p class="timing-note" id="heat-hint">Three marbles, two seconds apart. Compare your launch speed with runs 2 m/s slower and faster.</p>
+          <ol class="heat-standings" id="heat-standings" aria-label="Heat standings"></ol>
+          <button id="start-heat" class="paper-button primary" aria-describedby="heat-hint"><i data-icon="heat"></i><span id="heat-action">Start heat</span><kbd>H</kbd></button>
+        </section>
+      </section>
+      <section class="marble-setup">
+        <div class="section-heading"><i data-icon="marble"></i><h2>Marble setup</h2></div>
+        <div class="field-label"><span id="color-label">Finish</span><output id="color-name">Persimmon</output></div>
+        <div class="swatches" id="swatches" role="group" aria-labelledby="color-label"></div>
+        <label class="field-label speed-label" for="speed"><span>Launch speed</span><output id="speed-label" for="speed"><span id="speed-value">10</span> <small>m/s</small></output></label>
+        <input id="speed" type="range" min="0" max="16" step="0.5" value="10" aria-label="Launch speed in metres per second">
+        <div class="range-ends" aria-hidden="true"><span>0 m/s</span><span>16 m/s</span></div>
+        <div class="playback" role="group" aria-label="Simulation playback">
+          <span class="playback-label">Playback</span>
+          <div class="rate-options" role="group" aria-label="Playback speed">
+            <button data-rate="0.25" aria-label="Quarter speed" aria-pressed="false">¼×</button>
+            <button data-rate="0.5" aria-label="Half speed" aria-pressed="false">½×</button>
+            <button data-rate="1" aria-label="Normal speed" aria-pressed="true">1×</button>
+          </div>
+          <button id="step-frame" title="Advance 1/60 s while paused (.)" disabled><i data-icon="step"></i>Step</button>
+        </div>
+      </section>
+    </aside>
+  </main>
+  <footer class="statusbar">
+    <div class="status-left"><span class="live-status"><b id="status-dot"></b><span id="sim-state">Physics live</span></span>
+      <span class="status-divider"></span><span><strong id="in-play">0</strong> in play</span><span class="count-dot">·</span><span><strong id="finished">0</strong> finished</span>
+    </div>
+    <div class="gestures"><span><i data-icon="mouse"></i>Click to select · Drag to orbit</span><span><i data-icon="scroll"></i>Scroll to zoom</span></div>
+    <span class="gravity"><i data-icon="gravity"></i>9.81 m/s²</span>
+  </footer>
+  <dialog id="help" aria-labelledby="help-title">
+    <div class="dialog-head"><h2 id="help-title">Workshop controls</h2><button id="help-close" class="icon-button" aria-label="Close controls"><i data-icon="close"></i></button></div>
+    <div class="help-content">
+      <h3>Marbles</h3>
+      <div><span>Drop a marble</span><kbd>Space</kbd></div>
+      <div><span>Pause or resume</span><kbd>P</kbd></div>
+      <div><span>Clear marbles and scores</span><kbd>C</kbd></div>
+      <div><span>Toggle best-run ghost</span><kbd>G</kbd></div>
+      <div><span>Start a three-marble pace heat</span><kbd>H</kbd></div>
+      <div><span>Advance 1/60 s while paused</span><kbd>.</kbd></div>
+      <div><span>Review the last run / return to live</span><kbd>R</kbd></div>
+      <h3>Build</h3>
+      <div><span>Add a library piece at the build position</span><kbd>1 – 9</kbd></div>
+      <div><span>Build an uphill ramp</span><kbd>Shift + 2 / Shift-click Ramp</kbd></div>
+      <div><span>Remove the selected or last piece</span><kbd>Backspace</kbd></div>
+      <div><span>Undo / redo</span><kbd>Ctrl / ⌘ + Z / Shift Z</kbd></div>
+      <h3>Camera</h3>
+      <div><span>Orbit the track</span><kbd>Drag / arrow keys</kbd></div>
+      <div><span>Zoom</span><kbd>Scroll / pinch / + −</kbd></div>
+      <div><span>Fit the full track</span><kbd>F</kbd></div>
+      <div><span>Toggle follow camera</span><kbd>V</kbd></div>
+      <p>Click or tap a piece in the 3D view, use the course profile, or choose a piece under Build at. Cards insert before it. Earlier and Later move it along the run. Click the tabletop or finish bay to append again.</p>
+      <p>In Time trials, Start heat ranks three releases by elapsed time. Follow marble tracks the newest runner. Use Playback in Marble setup to slow a loop down, or pause and step through it.</p>
+      <p>Try the Gap jump (9) on Podium Post at 7 and 10 m/s. Open Run replay in Time trials to see the landing and speed trace. Drag the replay slider to pause at any instant. P plays, the period key steps a paused replay, and Escape returns to the held race.</p>
+      <p>Try the starter loop at 10 m/s. Drive strips (7) add speed and brake strips (8) slow a fast marble. A ramp placed at the lowest track height climbs uphill.</p>
+      <p>In Build, set Gate height between 0.9 and 12 m and choose Apply. The ramps rebuild from that height. Undo restores the previous tower.</p>
+      <p>Cross the blue halfway gate and the flag going forward to post a time. Open Time trials to see the latest drop race the ghost. Clear or edit the course to reset its records.</p>
+      <p>Use Layouts → Track blueprints to copy a course or open a saved code.</p>
+    </div>
+  </dialog>
+  <dialog id="blueprints" aria-labelledby="blueprint-title">
+    <div class="dialog-head"><h2 id="blueprint-title">Track blueprints</h2><button id="blueprint-close" class="icon-button" aria-label="Close blueprints"><i data-icon="close"></i></button></div>
+    <div class="blueprint-body">
+      <p>Keep a copy of your course or trade it with a friend. Each code includes the track name, release height and pieces.</p>
+      <label for="blueprint-name">Name on blueprint</label>
+      <input id="blueprint-name" type="text" maxlength="48" autocomplete="off">
+      <label for="blueprint-export">Current track code</label>
+      <textarea id="blueprint-export" rows="2" readonly spellcheck="false"></textarea>
+      <button class="paper-button" id="blueprint-copy"><i data-icon="copy"></i>Copy code</button>
+      <div class="blueprint-import">
+        <label for="blueprint-input">Open a track code</label>
+        <textarea id="blueprint-input" rows="2" maxlength="256" spellcheck="false" placeholder="Paste an LF1/… code"></textarea>
+        <button class="paper-button primary" id="blueprint-load">Open layout</button>
+      </div>
+      <p class="blueprint-status" id="blueprint-status" role="status"></p>
+    </div>
+  </dialog>
+</body>
+</html>

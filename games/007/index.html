@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#131517">
+  <title>Twistlab — Cube simulator</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23131517'/%3E%3Cpath d='m16 3 11 6-11 6L5 9Zm-12 9 10 6v11L4 23Zm14 6 10-6v11l-10 6Z' fill='%23c2f783'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="js/math.js"></script>
+  <script defer src="js/cube.js"></script>
+  <script defer src="js/notation.js"></script>
+  <script defer src="js/analysis.js"></script>
+  <script defer src="js/cross.js"></script>
+  <script defer src="js/checkpoints.js"></script>
+  <script defer src="js/trials.js"></script>
+  <script defer src="js/mesh.js"></script>
+  <script defer src="js/solver.js"></script>
+  <script defer src="js/session.js"></script>
+  <script defer src="js/renderer.js"></script>
+  <script defer src="js/viewport.js"></script>
+  <script defer src="js/timeline.js"></script>
+  <script defer src="js/planner.js"></script>
+  <script defer src="js/editor.js"></script>
+  <script defer src="js/net.js"></script>
+  <script defer src="js/trialpanel.js"></script>
+  <script defer src="js/coach.js"></script>
+  <script defer src="js/checkpointpanel.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-brand" viewBox="0 0 32 32"><path fill="currentColor" stroke="none" d="M16 1.5 29.5 9 16 16.5 2.5 9ZM1.7 11.6l12.7 7.1v12.5L1.7 24.1Zm15.9 7.1 12.7-7.1v12.5l-12.7 7.1Z"/><path d="m5.5 16.4 5.3 3v3.5l-5.3-3Zm15.4 5.8 5.4-3v3.5l-5.4 3Z" fill="#141719" stroke="none"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M3 5.5c3.2-.9 6.2-.3 9 1.7 2.8-2 5.8-2.6 9-1.7v13c-3.2-.9-6.2-.3-9 1.7-2.8-2-5.8-2.6-9-1.7zM12 7.2v13"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1.5 7.2M4 4.7V10h5.3"/></symbol>
+    <symbol id="i-frame" viewBox="0 0 24 24"><path d="M8 3.5H3.5V8m12-4.5H20V8M3.5 16v4.5H8m12-4.5v4.5h-4.5"/><path d="m8 10 4-2.3 4 2.3v4.5l-4 2.3-4-2.3Zm0 0 4 2.3 4-2.3m-4 2.3v4.5"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M8.5 4H4v4.5M15.5 4H20v4.5M20 15.5V20h-4.5M4 15.5V20h4.5"/></symbol>
+    <symbol id="i-shrink" viewBox="0 0 24 24"><path d="M4 9h5V4m6 0v5h5m0 6h-5v5m-6 0v-5H4"/></symbol>
+    <symbol id="i-view" viewBox="0 0 24 24"><path d="m12 3 8.2 4.6v8.8L12 21l-8.2-4.6V7.6zM4.2 7.9l7.8 4.4 7.8-4.4M12 12.3v8.3"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M3.5 6.5H8m5 0h7.5M3.5 17.5H14m5 0h1.5"/><circle cx="10.5" cy="6.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/></symbol>
+    <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M3 6h2.5c5.4 0 7.1 12 12.5 12h3m-3.2-3.1L21 18l-3.2 3.1M3 18h2.5c2.5 0 4.4-2.5 6-5.7M14.2 7.5C15.3 6.5 16.4 6 18 6h3m-3.2-3.1L21 6l-3.2 3.1"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m7 4.7 12 7.3-12 7.3z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14m8-14v14" stroke-width="3"/></symbol>
+    <symbol id="i-step" viewBox="0 0 24 24"><path d="m5 5 11 7-11 7zM19 5v14"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M8.5 5 4 9.5 8.5 14M4 9.5h10.2a5.3 5.3 0 0 1 0 10.6H11"/></symbol>
+    <symbol id="i-prime" viewBox="0 0 24 24"><path d="M5 10a7.3 7.3 0 1 1 .4 6.6M5 5v5h5"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M2.8 11a9 9 0 1 1 2.5 7.3M2.8 5.5V11h5.5M12 7v5l3.2 2"/></symbol>
+    <symbol id="i-mouse" viewBox="0 0 24 24"><rect x="6" y="2.7" width="12" height="18.6" rx="6"/><path d="M12 6v4"/></symbol>
+    <symbol id="i-orbit" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="4.8" transform="rotate(-30 12 12)"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M5.5 9h1m3 0h1m3 0h1m3 0h1m-13 3h1m3 0h1m3 0h1m3 0h1m-11 3h7"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.2"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5.2 5.2L20 6.5"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18"/></symbol>
+    <symbol id="i-net" viewBox="0 0 24 24"><path d="M7 3h5.5v18H7zM1.5 9h22v6h-22zM18 9v6"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="14" r="8"/><path d="M9 2h6m-3 0v4m6 2 1.7-1.7M12 14l3-3.5"/></symbol>
+    <symbol id="i-explode" viewBox="0 0 24 24"><path d="m12 2 9 4.5-9 4.5-9-4.5zM3 11.7l9 4.5 9-4.5M3 17l9 4.5 9-4.5"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 24 24"><path d="M8.5 2.5h7v6h6v7h-6v6h-7v-6h-6v-7h6z"/><path d="M10 12h4"/></symbol>
+    <symbol id="i-checkpoint" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4.5L6 21zM9 7h6"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="bar-inner">
+      <div class="brand"><svg class="brand-symbol" aria-hidden="true"><use href="#i-brand"/></svg><span>Twistlab</span></div>
+      <nav class="navigation" aria-label="Workspace">
+        <button class="nav-item selected" id="nav-simulator" aria-current="page">Simulator</button>
+        <a class="nav-item" href="#cross-coach">Practice</a>
+        <a class="nav-item" href="#algorithm-input">Algorithms</a>
+        <a class="nav-item" href="#time-trial">Time trials</a>
+        <button class="nav-item" id="guide-open"><svg class="icon"><use href="#i-book"/></svg>Move guide</button>
+      </nav>
+      <span class="local-status"><span class="live-dot"></span>Local session</span>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <div class="workspace-heading">
+      <div><div class="title-line"><h1>Cube simulator</h1><span class="size-tag" aria-label="3 by 3 by 3 cube">3 × 3 × 3</span></div>
+        <p>Turn the cube, rehearse an algorithm or study a solve one move at a time.</p></div>
+      <button class="quiet-button reset-button" id="reset-cube"><svg class="icon"><use href="#i-reset"/></svg>Reset cube</button>
+    </div>
+
+    <div class="studio">
+      <section class="viewport-card" aria-label="Cube viewport">
+        <div class="stage" id="stage">
+          <div class="registration" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <canvas id="cube-canvas" tabindex="0" aria-label="Interactive 3D cube. Drag to orbit, click a face to turn, or Alt-click a corner or edge between turns to track it."></canvas>
+          <div class="stage-top">
+            <span class="view-label" id="view-label"><svg class="icon"><use href="#i-frame"/></svg><span id="view-name">Perspective</span></span>
+            <span class="trial-stage" id="trial-stage" hidden aria-hidden="true"><svg class="icon"><use href="#i-timer"/></svg><b id="trial-stage-time">0:00.00</b><span id="trial-stage-code"></span></span>
+            <div class="view-tools">
+              <button class="icon-button explode-button" id="explode-view" aria-label="Exploded view" aria-pressed="false" title="Separate the pieces for inspection"><svg class="icon" aria-hidden="true"><use href="#i-explode"/></svg><span>Explode</span></button>
+              <button class="icon-button letters-button" id="sticker-letters" aria-label="Show sticker letters" aria-pressed="false" title="Show home-face letters on all stickers">Aa</button>
+              <button class="icon-button" id="reset-view" aria-label="Reset camera view" title="Reset view (Home)"><svg class="icon"><use href="#i-view"/></svg></button>
+              <button class="icon-button" id="expand-view" aria-label="Expand viewport" aria-controls="stage" aria-pressed="false" title="Expand viewport"><svg class="icon"><use id="expand-icon" href="#i-expand"/></svg></button>
+            </div>
+          </div>
+          <div class="stage-bottom">
+            <svg id="axes" viewBox="0 0 68 58" role="img" aria-label="Camera orientation axes">
+              <g id="axis-x"><line/><text>X</text></g><g id="axis-y"><line/><text>Y</text></g><g id="axis-z"><line/><text>Z</text></g>
+              <circle cx="31" cy="32" r="2.5" fill="#acb4b5"/>
+            </svg>
+            <div class="view-hint"><svg class="icon"><use href="#i-mouse"/></svg><span>Drag to orbit</span><i></i><span>Scroll to zoom</span></div>
+          </div>
+          <div class="render-error" id="render-error" role="alert" hidden><svg class="icon"><use href="#i-view"/></svg><h2>3D view unavailable</h2><p id="render-error-text">Enable WebGL or hardware acceleration in your browser, then reopen this file.</p><a href="#cube-net" id="net-shortcut">Use the face net</a></div>
+        </div>
+        <dl class="readouts">
+          <div><dt>Puzzle state</dt><dd><span class="state-dot" id="state-dot"></span><span id="puzzle-state">Mixed</span></dd></div>
+          <div><dt>Turn count</dt><dd class="mono" id="turn-count">08</dd></div>
+          <div><dt>Last turn</dt><dd class="mono" id="last-turn">U′</dd></div>
+        </dl>
+      </section>
+
+      <aside class="deck panel" aria-labelledby="deck-title">
+        <h2 class="deck-title" id="deck-title"><span class="deck-icon"><svg class="icon"><use href="#i-sliders"/></svg></span>Control deck</h2>
+        <div class="actions">
+          <button id="scramble" class="action primary"><svg class="icon"><use href="#i-shuffle"/></svg><span>Scramble</span><kbd>S</kbd></button>
+          <button id="solve" class="action secondary"><svg class="icon"><use id="solve-icon" href="#i-play"/></svg><span id="solve-label">Auto-solve</span><kbd>Space</kbd></button>
+        </div>
+        <div class="speed-section">
+          <div class="section-label"><label for="speed">Playback speed</label><output for="speed" id="speed-value">1×</output></div>
+          <input id="speed" type="range" aria-label="Playback speed" aria-valuetext="1 times" min="0" max="4" step="1" value="2">
+        </div>
+        <div class="faces-section">
+          <div class="section-label"><h3>Face turns</h3><div class="turn-modifiers" role="group" aria-label="Turn modifiers">
+            <button id="prime" class="prime-button" aria-pressed="false" title="Reverse face turns"><svg class="icon"><use href="#i-prime"/></svg>Prime</button>
+            <button id="half" class="prime-button" aria-pressed="false" title="Toggle half turns (2)">Half</button>
+          </div></div>
+          <div class="face-grid" id="face-grid"></div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="timeline panel" aria-labelledby="timeline-title">
+      <div class="timeline-head"><div class="timeline-title"><svg class="icon"><use href="#i-history"/></svg><h2 id="timeline-title">Move history</h2><span class="sequence-label" id="sequence-label">Starter mix</span></div>
+        <div class="timeline-actions">
+          <button class="text-button" id="back-step" hidden>Previous step</button>
+          <button class="text-button" id="step" hidden><svg class="icon"><use href="#i-step"/></svg>Next step</button>
+          <button class="text-button" id="replay" hidden><svg class="icon"><use href="#i-reset"/></svg>Replay</button>
+          <button class="text-button" id="undo" title="Undo last turn (Z)"><svg class="icon"><use href="#i-undo"/></svg>Undo</button>
+        </div></div>
+      <div class="sequence" id="sequence" aria-label="Move sequence" tabindex="0"></div>
+      <div class="review-bar" id="review-bar" hidden>
+        <label for="review-position">Review position</label>
+        <input id="review-position" type="range" min="0" step="1" value="0" aria-label="Completed turns">
+        <button class="text-button" id="end-review" title="Return to free play at the last completed turn">Keep position</button>
+      </div>
+    </section>
+
+    <div class="practice-row">
+      <section class="coach-panel panel" id="cross-coach" aria-labelledby="cross-title">
+        <div class="practice-head">
+          <div class="tool-heading"><svg class="icon" aria-hidden="true"><use href="#i-cross"/></svg><h2 id="cross-title">Cross coach</h2></div>
+          <div class="target-face"><label for="cross-face">Target face</label><select id="cross-face"></select></div>
+        </div>
+        <ul class="cross-edges" id="cross-edges" aria-label="Target edges and current positions"></ul>
+        <div class="coach-actions">
+          <span id="cross-progress" class="mono"></span>
+          <button class="quiet-button" id="cross-show">Show hint</button>
+          <button class="quiet-button run-button" id="cross-play" hidden>Play turn</button>
+        </div>
+        <p class="tool-hint" id="cross-note" role="status"></p>
+      </section>
+      <section class="checkpoint-panel panel" aria-labelledby="checkpoint-title">
+        <div class="tool-heading"><svg class="icon" aria-hidden="true"><use href="#i-checkpoint"/></svg><h2 id="checkpoint-title">Checkpoints</h2></div>
+        <p class="tool-hint" id="checkpoint-help">Save the last completed turn. Restore a slot to resume free play from there.</p>
+        <div class="checkpoint-slots" id="checkpoint-slots" role="group" aria-label="Checkpoint slots"></div>
+        <div class="checkpoint-actions">
+          <label class="sr-only" for="checkpoint-name">Checkpoint name (optional)</label>
+          <input type="text" id="checkpoint-name" maxlength="40" placeholder="Name (optional)" autocomplete="off">
+          <button class="quiet-button" id="checkpoint-save">Save position</button>
+          <button class="quiet-button" id="checkpoint-restore">Restore</button>
+          <button class="text-button" id="checkpoint-clear" title="Clear the selected checkpoint">Clear</button>
+        </div>
+        <p id="checkpoint-status" role="status"></p>
+      </section>
+    </div>
+
+    <section class="trial-panel panel" id="time-trial" aria-labelledby="trial-title">
+      <div class="trial-setup">
+        <div class="tool-heading"><svg class="icon"><use href="#i-timer"/></svg><h2 id="trial-title">Time trial</h2></div>
+        <p class="tool-hint" id="trial-help">A code sets the starting mix. Start replaces the current cube. Inspect it, then turn to start the clock.</p>
+        <label class="editor-label" for="trial-code">Challenge code</label>
+        <div class="trial-actions">
+          <input type="text" id="trial-code" value="3-HKBU" spellcheck="false" autocomplete="off" autocapitalize="characters" aria-describedby="trial-help trial-status" title="1–20 turns, a hyphen and up to 16 letters or digits">
+          <button class="quiet-button" id="trial-daily" title="Use today’s 12-turn code in Hong Kong time">HK daily</button>
+          <button class="quiet-button run-button" id="trial-start">Start trial</button>
+          <button class="quiet-button" id="trial-end" hidden>End trial</button>
+        </div>
+        <p id="trial-status" role="status" aria-live="polite"></p>
+      </div>
+      <dl class="trial-scores">
+        <div class="elapsed"><dt>Elapsed time</dt><dd id="trial-time" role="timer" aria-live="off">0:00.00</dd></div>
+        <div><dt>Your turns</dt><dd id="trial-turns">0</dd></div>
+        <div><dt>Best for code</dt><dd><span id="trial-best">—</span> <small id="trial-best-turns"></small></dd></div>
+      </dl>
+    </section>
+
+    <div class="practice-tools">
+      <section class="editor-panel panel" aria-labelledby="editor-title">
+        <div class="tool-heading"><svg class="icon"><use href="#i-code"/></svg><h2 id="editor-title">Algorithm editor</h2></div>
+        <div class="presets" id="algorithm-presets" role="group" aria-label="Example sequences"></div>
+        <label class="editor-label" for="algorithm-input">Move sequence</label>
+        <textarea id="algorithm-input" rows="2" spellcheck="false" autocomplete="off" aria-describedby="algorithm-help algorithm-feedback"></textarea>
+        <p class="tool-hint" id="algorithm-help">Play from the current position. Use <b>(R U)3</b> to repeat, <b>[R,U]</b> for a commutator or <b>[R:U]</b> for a conjugate.</p>
+        <div class="editor-actions">
+          <button class="quiet-button run-button" id="algorithm-play"><svg class="icon"><use href="#i-play"/></svg>Play sequence</button>
+          <button class="quiet-button" id="algorithm-invert" title="Reverse the order and direction of all turns">Invert</button>
+          <output id="algorithm-feedback" for="algorithm-input" role="status"></output>
+        </div>
+        <div class="effect">
+          <h3>Effect from solved</h3>
+          <dl class="effect-stats">
+            <div><dt>Corners affected</dt><dd id="effect-corners">—</dd></div>
+            <div><dt>Edges affected</dt><dd id="effect-edges">—</dd></div>
+            <div><dt>Repeats to restore colors</dt><dd id="effect-repeats">—</dd></div>
+          </dl>
+        </div>
+      </section>
+      <section class="net-panel panel" aria-labelledby="net-title">
+        <div class="tool-heading"><svg class="icon"><use href="#i-net"/></svg><h2 id="net-title">Face net</h2><span id="net-score" class="net-score" title="Stickers matching the center of their current face"></span></div>
+        <div class="cube-net" id="cube-net" role="group" aria-labelledby="net-title" aria-describedby="net-help" tabindex="-1"></div>
+        <p class="tool-hint" id="net-help">Select a face to turn it. Letters show home faces. Alt-click a 3D corner or edge between turns to track it.</p>
+        <div class="tracker">
+          <label for="tracked-piece">Track a piece</label>
+          <select id="tracked-piece" aria-describedby="piece-location"><option value="">Off</option></select>
+          <p id="piece-location" role="status" hidden></p>
+        </div>
+      </section>
+    </div>
+    <footer class="workspace-footer">
+      <div class="keyboard-hint"><svg class="icon"><use href="#i-keyboard"/></svg><span><b>U R F D L B</b> to turn</span><i></i><span><b>Shift</b> to reverse</span></div>
+      <span class="location"><svg class="icon"><use href="#i-pin"/></svg>HKBU · Kowloon Tong</span>
+    </footer>
+  </main>
+
+  <dialog id="guide" aria-labelledby="guide-title">
+    <div class="guide-header"><div class="guide-heading"><svg class="icon"><use href="#i-book"/></svg><h2 id="guide-title">Move guide</h2></div>
+      <button id="guide-close" class="icon-button" aria-label="Close move guide" autofocus><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div class="guide-body">
+      <p>Each letter names a face of the cube. Its center tile keeps that color as the other tiles move.</p>
+      <div id="guide-faces" class="guide-faces"></div>
+      <h3>Reading a turn</h3>
+      <div class="notation"><b>R</b><span>A clockwise quarter turn, looking at the right face.</span><b>R′</b><span>A counterclockwise quarter turn, called a prime.</span><b>R2</b><span>A half turn in either direction.</span></div>
+      <h3>Controls</h3>
+      <dl class="guide-controls">
+        <dt>Orbit / zoom</dt><dd>Drag / scroll or pinch</dd>
+        <dt>Turn a face</dt><dd>Click a face or press its letter</dd>
+        <dt>Reverse a turn</dt><dd>Hold Shift or toggle Prime</dd>
+        <dt>Half turns</dt><dd>Toggle Half or press <kbd>2</kbd>, then turn any face. Toggle it again for quarter turns.</dd>
+        <dt>Scramble / undo</dt><dd><kbd>S</kbd> / <kbd>Z</kbd></dd>
+        <dt>Solve / pause / resume</dt><dd><kbd>Space</kbd> on the viewport</dd>
+        <dt>One solution turn</dt><dd>Pause, then choose Next step</dd>
+        <dt>Review a position</dt><dd>Drag the review slider during a solution or algorithm. Resume to play from there.</dd>
+        <dt>Branch from a step</dt><dd>Keep position returns the last completed turn to free play.</dd>
+        <dt>Read sticker colors</dt><dd>Toggle Aa in the viewport, or read the six grids in the face net.</dd>
+        <dt>Play an algorithm</dt><dd>Enter face letters in the editor. Use ′ for reverse, 2 for a half turn, and (R U)3 for a repeated group.</dd>
+        <dt>Bracket notation</dt><dd>[A,B] plays A, B and their inverses in that order. [A:B] plays A, B, then the inverse of A. Either part can contain several turns.</dd>
+        <dt>Follow one piece</dt><dd>Choose its home letters under the face net or Alt-click a 3D corner or edge between turns. Alt-click it again to clear. The net rings its stickers and the 3D view lights its body.</dd>
+        <dt>Inspect the layers</dt><dd>Toggle Explode to separate the pieces. Click an outward face to turn it or Alt-click an exposed edge or corner to track it.</dd>
+        <dt>Practice a cross</dt><dd>Choose a target face in Cross coach. An aligned edge matches both centers. Show hint finds a shortest route. Play the suggested turn or try it yourself.</dd>
+        <dt>Retry a position</dt><dd>Select a checkpoint slot and save at any completed turn, including a step in playback review. Restore brings back its cube and move history.</dd>
+        <dt>Race a mix</dt><dd>Enter a code such as 3-HKBU in Time trial. Your first manual turn starts the clock. Solving stops it. Trial turns animate at a fixed speed.</dd>
+        <dt>Orbit without a mouse</dt><dd>Arrow keys on the viewport</dd>
+        <dt>Zoom / reset view</dt><dd><kbd>+</kbd> <kbd>−</kbd> / <kbd>Home</kbd></dd>
+      </dl>
+    </div>
+  </dialog>
+  <div class="sr-only" id="announcement" role="status" aria-live="polite" aria-atomic="true"></div>
+  <noscript><div class="noscript">Enable JavaScript to use the 3D cube simulator.</div></noscript>
+</body>
+</html>

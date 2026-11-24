@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+steamfold.sqlite3
+steamfold.sqlite3-*

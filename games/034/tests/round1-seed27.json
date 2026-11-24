@@ -1,0 +1,218 @@
+{
+  "format": "gutterlight-relay",
+  "version": 1,
+  "seed": 27,
+  "limit_ticks": 180,
+  "opening": [
+    [
+      "wick",
+      "drum",
+      "ballast",
+      "squall",
+      "rivet",
+      "clip",
+      "ink",
+      "patch"
+    ],
+    [
+      "patch",
+      "foil",
+      "squall",
+      "loom",
+      "clip",
+      "ink",
+      "rivet",
+      "wick"
+    ]
+  ],
+  "end_tick": 180,
+  "plays": [
+    {
+      "tick": 1,
+      "side": "amber",
+      "slot": 2,
+      "lane": "roof"
+    },
+    {
+      "tick": 1,
+      "side": "indigo",
+      "slot": 4,
+      "lane": "roof"
+    },
+    {
+      "tick": 9,
+      "side": "amber",
+      "slot": 4,
+      "lane": "roof"
+    },
+    {
+      "tick": 9,
+      "side": "indigo",
+      "slot": 3,
+      "lane": "roof"
+    },
+    {
+      "tick": 25,
+      "side": "amber",
+      "slot": 2,
+      "lane": "roof"
+    },
+    {
+      "tick": 25,
+      "side": "indigo",
+      "slot": 4,
+      "lane": "canal"
+    },
+    {
+      "tick": 35,
+      "side": "amber",
+      "slot": 1,
+      "lane": "canal"
+    },
+    {
+      "tick": 37,
+      "side": "indigo",
+      "slot": 4,
+      "lane": "roof"
+    },
+    {
+      "tick": 45,
+      "side": "amber",
+      "slot": 2,
+      "lane": "canal"
+    },
+    {
+      "tick": 45,
+      "side": "indigo",
+      "slot": 4,
+      "lane": "roof"
+    },
+    {
+      "tick": 57,
+      "side": "amber",
+      "slot": 4,
+      "lane": "roof"
+    },
+    {
+      "tick": 59,
+      "side": "indigo",
+      "slot": 3,
+      "lane": "canal"
+    },
+    {
+      "tick": 69,
+      "side": "amber",
+      "slot": 4,
+      "lane": "canal"
+    },
+    {
+      "tick": 69,
+      "side": "indigo",
+      "slot": 3,
+      "lane": "roof"
+    },
+    {
+      "tick": 85,
+      "side": "amber",
+      "slot": 2,
+      "lane": "canal"
+    },
+    {
+      "tick": 85,
+      "side": "indigo",
+      "slot": 3,
+      "lane": "canal"
+    },
+    {
+      "tick": 95,
+      "side": "amber",
+      "slot": 2,
+      "lane": "canal"
+    },
+    {
+      "tick": 97,
+      "side": "indigo",
+      "slot": 4,
+      "lane": "canal"
+    },
+    {
+      "tick": 105,
+      "side": "indigo",
+      "slot": 4,
+      "lane": "canal"
+    },
+    {
+      "tick": 109,
+      "side": "amber",
+      "slot": 4,
+      "lane": "roof"
+    },
+    {
+      "tick": 119,
+      "side": "indigo",
+      "slot": 2,
+      "lane": "roof"
+    },
+    {
+      "tick": 121,
+      "side": "amber",
+      "slot": 2,
+      "lane": "canal"
+    },
+    {
+      "tick": 125,
+      "side": "indigo",
+      "slot": 4,
+      "lane": "roof"
+    },
+    {
+      "tick": 129,
+      "side": "amber",
+      "slot": 1,
+      "lane": "canal"
+    },
+    {
+      "tick": 141,
+      "side": "amber",
+      "slot": 4,
+      "lane": "roof"
+    },
+    {
+      "tick": 141,
+      "side": "indigo",
+      "slot": 3,
+      "lane": "roof"
+    },
+    {
+      "tick": 149,
+      "side": "amber",
+      "slot": 4,
+      "lane": "roof"
+    },
+    {
+      "tick": 153,
+      "side": "indigo",
+      "slot": 2,
+      "lane": "roof"
+    },
+    {
+      "tick": 161,
+      "side": "amber",
+      "slot": 2,
+      "lane": "roof"
+    },
+    {
+      "tick": 169,
+      "side": "indigo",
+      "slot": 3,
+      "lane": "roof"
+    },
+    {
+      "tick": 177,
+      "side": "amber",
+      "slot": 1,
+      "lane": "roof"
+    }
+  ],
+  "state_sha256": "2be12e06163daaf622aaa3980778d6e669ee57ea8c118b5e402be537f51b476f"
+}

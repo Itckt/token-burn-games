@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <title>Field Atlas · Terrain Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%2324382f'/%3E%3Cpath d='m6 28 9-16 5 8 5-12 9 20Z' fill='none' stroke='%23edcc8e' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="js/math.js"></script>
+  <script defer src="js/noise.js"></script>
+  <script defer src="js/terrain.js"></script>
+  <script defer src="js/erosion.js"></script>
+  <script defer src="js/hydrology.js"></script>
+  <script defer src="js/waterways.js"></script>
+  <script defer src="js/meshes.js"></script>
+  <script defer src="js/simulation.js"></script>
+  <script defer src="js/observatory.js"></script>
+  <script defer src="js/weather.js"></script>
+  <script defer src="js/survey.js"></script>
+  <script defer src="js/probe.js"></script>
+  <script defer src="js/relay.js"></script>
+  <script defer src="js/shaders.js"></script>
+  <script defer src="js/renderer.js"></script>
+  <script defer src="js/cartography.js"></script>
+  <script defer src="js/navigation.js"></script>
+  <script defer src="js/survey-panel.js"></script>
+  <script defer src="js/basin-panel.js"></script>
+  <script defer src="js/flight-panel.js"></script>
+  <script defer src="js/observatory-panel.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-guide" viewBox="0 0 24 24"><path d="M3 5.5q4.4-1.6 9 1.6 4.6-3.2 9-1.6v13q-4.4-1.6-9 1.6-4.6-3.2-9-1.6zM12 7v13"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M3 6h7m4 0h7M3 12h13m4 0h1M3 18h2m4 0h12"/><circle cx="12" cy="6" r="2"/><circle cx="18" cy="12" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+    <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4" transform="rotate(-8 12 12)"/><g fill="currentColor" stroke="none"><circle cx="8" cy="9" r="1.25"/><circle cx="15.5" cy="8" r="1.25"/><circle cx="12" cy="12" r="1.25"/><circle cx="8.5" cy="16" r="1.25"/><circle cx="16" cy="15" r="1.25"/></g></symbol>
+    <symbol id="i-regen" viewBox="0 0 24 24"><path d="M20 9a8 8 0 0 0-13.5-3L4 8.5M4 3.5v5h5M4 15a8 8 0 0 0 13.5 3l2.5-2.5m0 5v-5h-5"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
+    <symbol id="i-ridge" viewBox="0 0 24 24"><path d="m2 18 6-9 4 5 3-4 7 8H2zM6 12l2 1 2-1"/><circle cx="16.5" cy="5.5" r="2.3"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.3A8.3 8.3 0 0 1 9.7 4.5a8.1 8.1 0 1 0 9.8 9.8z"/></symbol>
+    <symbol id="i-water" viewBox="0 0 24 24"><path d="M2 8q2.5-3 5 0t5 0 5 0 5 0M2 13q2.5-3 5 0t5 0 5 0 5 0M2 18q2.5-3 5 0t5 0 5 0 5 0"/></symbol>
+    <symbol id="i-tree" viewBox="0 0 24 24"><path d="m10 2-5 7h3l-5 6h4l-3 3h12l-3-3h4l-5-6h3zM10 18v4m8-16 3 5h-2l3 5h-3m-1 0v4"/></symbol>
+    <symbol id="i-orbit" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="5.1" transform="rotate(-30 12 12)"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="5" cy="17" r="2.4"/><circle cx="19" cy="6" r="2.4"/><path d="M7.5 17H14a3 3 0 0 0 0-6h-4a2.5 2.5 0 0 1 0-5h6.5"/></symbol>
+    <symbol id="i-mist" viewBox="0 0 24 24"><path d="M3 7h12m3 0h3M6 12h15M3 17h5m3 0h7"/></symbol>
+    <symbol id="i-rain" viewBox="0 0 24 24"><path d="M6 13a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 16 6a3.5 3.5 0 1 1 2 7H6zm1 3-1.5 3m6-3L10 20m7-4-1.5 3"/></symbol>
+    <symbol id="i-fly" viewBox="0 0 24 24"><path d="m3 10 18-7-7 18-3.5-7.5zM21 3l-10.5 10.5"/></symbol>
+    <symbol id="i-skiff" viewBox="0 0 24 24"><path d="m3 12 3 5h11l4-5H3zm5 0 2-5h5l2 5M2 20q2 2 5 0t5 0 5 0 5 0"/></symbol>
+    <symbol id="i-depth" viewBox="0 0 24 24"><path d="M2 5q2-2 5 0t5 0 5 0 5 0M4 10v9m-2-2 2 2 2-2M8 21l5-6 4 1 5-7"/></symbol>
+    <symbol id="i-mouse" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="6"/><path d="M12 5v4"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="m2.5 5 6-2 7 3 6-2v15l-6 2-7-3-6 2zM8.5 3v15m7-12v15"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11s-7-6-7-11a7 7 0 1 1 14 0z"/><circle cx="12" cy="10" r="2.2"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 20V4m-6 6 6-6 6 6"/></symbol>
+    <symbol id="i-probe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><path d="M12 2v6m0 8v6M2 12h6m8 0h6"/></symbol>
+    <symbol id="i-gate" viewBox="0 0 24 24"><ellipse cx="14" cy="12" rx="6" ry="9"/><path d="M2 12h12m-4-4 4 4-4 4"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M6 9h.5m3 0h.5m3 0h.5m3 0h.5M6 12h.5m3 0h.5m3 0h.5m3 0h.5M8 15h8"/></symbol>
+    <symbol id="i-hash" viewBox="0 0 24 24"><path d="m9 3-3 18M18 3l-3 18M4 9h17M3 16h17"/></symbol>
+  </svg>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="identity">
+        <svg class="brandmark" viewBox="0 0 44 44" aria-hidden="true">
+          <rect width="44" height="44" rx="11" fill="#293e32"/>
+          <g fill="none" stroke="#f2d399" stroke-width="1.5" stroke-linejoin="round">
+            <path d="M6.5 28.6c3-3.8 5.3-3.8 7-8.7 1.4-4.1 3.6-4.6 5.7-8.1 2.1-3.4 5.5-3.2 7.6 1.1 2.4 4.8 5.6 4.1 7 9.5.8 3.4 4.9 6.1 3.5 8.9-1.3 2.6-5.2 1-9.3 2.5-3.9 1.5-7.8 3.6-11.7 1.6-3.7-1.9-13.4-1.6-9.8-6.8Z"/>
+            <path d="M12.3 27.5c3.8-3.2 3.3-6.7 6.2-9.1 2.5-2.3 3-6.8 5.7-3.2 2.9 4.2 4.8 4.2 6.3 8.3 1 2.8 4.9 5.8 1 6.2-4.9.5-8.8 4.1-12.6 2-2.9-1.6-9.6-1.4-6.6-4.2Z"/>
+            <path d="M18.1 26.1c2.1-2.3 2-4.7 4.3-6.3 1.6-.9 2 2.4 4.2 4.3 2.7 2.7-.3 3.1-2.8 4-2.8 1.1-7.8.6-5.7-2Z"/>
+          </g>
+        </svg>
+        <span class="wordmark">Field Atlas</span><span class="identity-rule"></span><span class="product-name">Terrain studio</span>
+      </div>
+      <div class="header-actions">
+        <span class="local-status"><i class="status-dot"></i>Local session</span>
+        <button class="guide-button" id="guide-open"><svg class="icon"><use href="#i-guide"/></svg>Field guide</button>
+      </div>
+    </div>
+  </header>
+  <main class="workbench">
+    <section class="viewer-card" id="viewer" aria-label="Terrain viewer">
+      <div class="scene" id="scene">
+        <canvas id="world" tabindex="0" aria-label="Interactive 3D landscape. Drag to look. Open the field guide for keyboard controls."></canvas>
+        <div class="scene-shade"></div>
+        <div class="live-chip"><i class="status-dot"></i><span id="live-label">Live view</span>
+          <progress id="tour-progress" max="1" value="0" aria-label="Tour distance" hidden></progress></div>
+        <div class="compass" id="compass" role="img" aria-label="Camera heading"><span>N</span>
+          <svg viewBox="0 0 52 52" aria-hidden="true">
+            <circle cx="26" cy="26" r="21" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width=".9"/>
+            <path d="M26 5v4m21 17h-4M26 47v-4M5 26h4M11.2 11.2l2 2m25.6 25.6 2 2m0-29.6-2 2M13.2 38.8l-2 2" stroke="currentColor" stroke-opacity=".65"/>
+            <g id="compass-needle"><path d="m26 10 5 17-5-2-5 2z" fill="#f5e9c9"/><path d="m26 42-5-15 5-2 5 2z" fill="#bf935a"/></g>
+          </svg>
+        </div>
+        <div class="scene-title"><div class="biome"><i></i><span id="region-name">Alpine highlands</span></div><h1 id="place-name">Alder Basin</h1></div>
+        <div class="reticle" aria-hidden="true"></div>
+        <div class="probe-reading" id="probe-reading" role="group" aria-label="Surface probe reading" hidden>
+          <strong id="probe-surface"></strong><span id="probe-detail"></span>
+        </div>
+        <div class="relay-hud" id="relay-hud" role="group" aria-label="Gate relay progress" hidden>
+          <div class="relay-line"><strong id="relay-gate"></strong><span id="relay-clock"></span></div>
+          <p id="relay-guidance"></p>
+          <div class="relay-line"><span id="relay-split"></span><button type="button" id="relay-again" hidden>Retry</button><button type="button" id="relay-end">End relay</button></div>
+        </div>
+        <div class="touch-flight" id="touch-flight" hidden aria-label="Touch movement controls">
+          <button data-key="KeyW" aria-label="Move forward">▲</button><button data-key="KeyA" aria-label="Move left">◀</button>
+          <button data-key="KeyS" aria-label="Move back">▼</button><button data-key="KeyD" aria-label="Move right">▶</button>
+          <button data-key="KeyE" aria-label="Climb">＋</button><button data-key="KeyQ" aria-label="Descend">−</button>
+        </div>
+        <div class="scene-error" id="scene-error" role="alert" hidden>
+          <strong id="error-title">3D view unavailable</strong><p id="error-detail"></p>
+        </div>
+        <div class="loading" id="loading" role="status">Surveying terrain…</div>
+      </div>
+      <div class="camera-bar">
+        <span class="camera-label">Camera</span>
+        <div class="mode-group" role="group" aria-label="Camera mode">
+          <button id="orbit" aria-pressed="true"><svg class="icon"><use href="#i-orbit"/></svg>Orbit</button>
+          <button id="fly" aria-pressed="false"><svg class="icon"><use href="#i-fly"/></svg>Fly</button>
+          <button id="skiff" aria-pressed="false" disabled><svg class="icon"><use href="#i-skiff"/></svg>Skiff</button>
+          <button id="tour" aria-pressed="false"><svg class="icon"><use href="#i-route"/></svg>Tour</button>
+        </div>
+        <button class="minor-button" id="tour-play" type="button" hidden>Pause</button>
+        <span class="camera-hint"><svg class="icon"><use href="#i-mouse"/></svg><span id="camera-hint">Drag to orbit · Scroll to zoom</span></span>
+        <button class="minor-button probe-button" id="probe" type="button" aria-pressed="false" aria-label="Surface probe" title="Toggle the surface probe" disabled><svg class="icon"><use href="#i-probe"/></svg><span>Probe</span></button>
+        <button class="icon-button expand" id="fullscreen" title="Enter fullscreen" aria-label="Enter fullscreen"><svg class="icon"><use href="#i-expand"/></svg></button>
+      </div>
+    </section>
+    <aside class="settings-card panel" aria-labelledby="settings-title">
+      <div class="settings-heading"><h2 id="settings-title">World settings</h2><svg class="icon"><use href="#i-sliders"/></svg></div>
+      <form class="seed-section" id="seed-form">
+        <label for="seed">Terrain seed</label>
+        <div class="seed-row"><div class="seed-input"><svg class="icon"><use href="#i-hash"/></svg><input id="seed" value="KT-0427" maxlength="96" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+          <button type="button" class="dice icon-button" id="dice" aria-label="Generate with a random seed" title="Generate with a random seed"><svg class="icon"><use href="#i-dice"/></svg></button>
+        </div>
+        <button class="generate" id="generate" type="submit"><svg class="icon"><use href="#i-regen"/></svg>Generate terrain</button>
+      </form>
+      <div class="time-section">
+        <div class="line"><label for="hour">Time of day</label><span class="clock-readout"><svg class="icon"><use id="light-icon" href="#i-sun"/></svg><output id="clock" for="hour">16:30</output></span></div>
+        <input type="range" id="hour" min="0" max="1439" value="990" step="1" aria-valuetext="16:30">
+        <div class="range-labels" aria-hidden="true"><span>00h</span><span>12h</span><span>24h</span></div>
+        <div class="line cycle-line"><span id="cycle-label">Day/night cycle</span><button class="switch" id="cycle" type="button" role="switch" aria-labelledby="cycle-label" aria-checked="true"></button></div>
+        <button type="button" class="study-open" id="study-open" aria-haspopup="dialog" aria-controls="observatory" disabled><svg class="icon"><use href="#i-ridge"/></svg>Ridge observatory<span aria-hidden="true">↗</span></button>
+      </div>
+      <div class="layer-section">
+        <div class="weather-picker" role="group" aria-labelledby="weather-label">
+          <h3 class="micro-heading" id="weather-label">Weather</h3>
+          <div class="weather-options">
+            <button type="button" data-weather="clear" aria-pressed="true"><svg class="icon"><use href="#i-sun"/></svg>Clear</button>
+            <button type="button" data-weather="mist" aria-pressed="false"><svg class="icon"><use href="#i-mist"/></svg>Sea mist</button>
+            <button type="button" data-weather="squall" aria-pressed="false"><svg class="icon"><use href="#i-rain"/></svg>Squall</button>
+          </div>
+        </div>
+        <h3 class="micro-heading">Scene layers</h3>
+        <div class="line layer-line"><span class="layer-name" id="water-label"><svg class="icon"><use href="#i-water"/></svg>Water</span><button class="switch" id="water" role="switch" aria-labelledby="water-label" aria-checked="true"></button></div>
+        <div class="line layer-line"><span class="layer-name" id="depth-label"><svg class="icon"><use href="#i-depth"/></svg>Depth chart</span><button class="switch" id="depth-chart" role="switch" aria-labelledby="depth-label" aria-checked="false" disabled></button></div>
+        <div class="line layer-line"><span class="layer-name" id="trees-label"><svg class="icon"><use href="#i-tree"/></svg>Trees</span><button class="switch" id="trees" role="switch" aria-labelledby="trees-label" aria-checked="true"></button></div>
+        <div class="line layer-line"><span class="layer-name" id="shadows-label"><svg class="icon"><use href="#i-ridge"/></svg>Ridge shadows<small id="shadows-unavailable" hidden>Unavailable</small></span><button class="switch" id="shadows" role="switch" aria-labelledby="shadows-label" aria-checked="true"></button></div>
+      </div>
+    </aside>
+    <section class="basin-card panel" aria-labelledby="basin-title">
+      <div class="bed-control">
+        <h2 id="basin-title">Basin study</h2>
+        <h3 class="micro-heading" id="weathering-label">Terrain weathering</h3>
+        <div class="bed-options" role="group" aria-labelledby="weathering-label">
+          <button type="button" data-wear="fresh" aria-pressed="true" disabled>Fresh</button>
+          <button type="button" data-wear="talus" aria-pressed="false" disabled>Talus</button>
+          <button type="button" data-wear="worn" aria-pressed="false" disabled>Worn</button>
+        </div>
+      </div>
+      <div class="stage-control">
+        <div class="line"><label for="lake-level"><svg class="icon"><use href="#i-water"/></svg>Lake level</label>
+          <output id="level-readout" for="lake-level">0 m</output></div>
+        <input type="range" id="lake-level" min="-6" max="8" step="1" value="0" aria-valuetext="0 metres at datum" disabled>
+        <div class="gauge-marks"><span>−6 m</span><button type="button" id="lake-datum" title="Reset lake level to zero" disabled>0 m datum</button><span>+8 m</span></div>
+      </div>
+      <div class="flood-measures" aria-label="Lake measurements">
+        <dl><div><dt>Flooded area</dt><dd id="flood-area">—</dd></div>
+          <div><dt>Stored water</dt><dd id="flood-volume">—</dd></div></dl>
+        <div class="coverage-line"><progress id="flood-cover" max="100" value="0" aria-label="Flooded share of the survey"></progress>
+          <span id="flood-share">—</span></div>
+      </div>
+    </section>
+    <section class="presets" aria-labelledby="presets-title">
+      <div class="section-heading"><h2 id="presets-title">Terrain presets</h2><span class="section-line"></span></div>
+      <div class="preset-grid" role="group" aria-label="Terrain preset">
+        <button class="preset" data-preset="alpine" aria-pressed="true">
+          <span class="artwork"><canvas width="480" height="140" aria-hidden="true"></canvas><span class="selected-mark"><svg class="icon"><use href="#i-check"/></svg></span></span>
+          <span class="preset-info"><strong>Alder Basin</strong><small>Alpine lake</small></span>
+        </button>
+        <button class="preset" data-preset="canyon" aria-pressed="false">
+          <span class="artwork"><canvas width="480" height="140" aria-hidden="true"></canvas><span class="selected-mark"><svg class="icon"><use href="#i-check"/></svg></span></span>
+          <span class="preset-info"><strong>Ember Canyon</strong><small>Desert canyon</small></span>
+        </button>
+        <button class="preset" data-preset="fjord" aria-pressed="false">
+          <span class="artwork"><canvas width="480" height="140" aria-hidden="true"></canvas><span class="selected-mark"><svg class="icon"><use href="#i-check"/></svg></span></span>
+          <span class="preset-info"><strong>Frostmere</strong><small>Glacial fjord</small></span>
+        </button>
+        <button class="preset" data-preset="caldera" aria-pressed="false">
+          <span class="artwork"><canvas width="480" height="140" aria-hidden="true"></canvas><span class="selected-mark"><svg class="icon"><use href="#i-check"/></svg></span></span>
+          <span class="preset-info"><strong>Lantern Caldera</strong><small>Flooded crater</small></span>
+        </button>
+      </div>
+    </section>
+    <section class="map-card" aria-labelledby="map-title">
+      <div class="map-bar"><h2 id="map-title"><svg class="icon"><use href="#i-map"/></svg>Survey map</h2>
+        <div class="map-tools"><button class="minor-button" id="plot-route" aria-pressed="false" disabled>Plot route</button>
+          <button class="minor-button" id="chart-passage" aria-pressed="false" disabled>Chart passage</button>
+          <button class="minor-button" id="trace-runoff" aria-pressed="false" disabled>Trace runoff</button></div>
+      </div>
+      <div class="map-view" id="map-view"><canvas id="survey" tabindex="-1" aria-label="Live topographic map with the flight path and camera heading"></canvas>
+        <span class="map-north">N<svg class="icon"><use href="#i-arrow"/></svg></span>
+        <button type="button" class="map-scope" id="map-scope" hidden>Full map</button>
+      </div>
+      <div class="depth-key" id="depth-key" hidden aria-label="Water depth bands in metres">
+        <span>Depth (m)</span><b data-band="0"></b><b data-band="1"></b><b data-band="2"></b><b data-band="3"></b>
+      </div>
+      <p class="plot-hint" id="plot-hint" role="status" hidden></p>
+      <div class="coordinates"><span>X <b id="map-x">+032</b></span><span>Z <b id="map-z">+144</b></span><span>ALT <b id="map-alt">43 m</b></span></div>
+    </section>
+    <section class="profile-card panel" aria-labelledby="profile-title">
+      <div class="profile-heading">
+        <div><h2 id="profile-title">Elevation profile</h2><p id="route-name">Inlet traverse</p></div>
+        <div class="profile-actions"><button id="restore-route" class="minor-button" hidden>Restore inlet route</button>
+          <button id="cast-off" class="minor-button" hidden disabled><svg class="icon"><use href="#i-skiff"/></svg>Cast off</button>
+          <button id="fly-route" class="minor-button" disabled><svg class="icon"><use href="#i-fly"/></svg>Fly route</button></div>
+      </div>
+      <div class="profile-chart">
+        <div class="profile-axis" aria-hidden="true"><span id="axis-high"></span><span id="axis-low"></span></div>
+        <div class="profile-graph">
+          <svg id="profile-plot" viewBox="0 0 640 88" preserveAspectRatio="none" aria-hidden="true">
+            <path id="profile-ground"/><path id="profile-water"/>
+            <line id="profile-datum" x1="0" x2="640"/>
+            <path id="profile-ridge"/>
+            <line id="profile-cursor" y1="0" y2="88"/>
+            <circle id="profile-point" r="3.2"/>
+          </svg>
+          <input class="plot-slider" type="range" id="station" min="0" max="1000" step="1" value="0" aria-label="Distance along the route" disabled>
+        </div>
+      </div>
+      <div class="profile-footer"><div class="profile-reading"><label for="station">Drag to inspect</label><output id="station-readout" for="station"></output></div>
+        <div class="route-stats"><span>Length <b id="route-length">—</b></span><span><span id="relief-label">Ascent</span> <b id="route-ascent">—</b></span><span>Over water <b id="route-wet">—</b></span></div>
+      </div>
+      <div class="relay-launch">
+        <div><h3>Gate relay</h3><p id="relay-record">Fly the gold gates along this route.</p></div>
+        <button type="button" class="minor-button" id="relay-start" disabled><svg class="icon"><use href="#i-gate"/></svg><span id="relay-action">Start relay</span></button>
+      </div>
+    </section>
+  </main>
+  <footer><span><svg class="icon"><use href="#i-pin"/></svg>Kowloon Tong field station</span><span id="render-status"><i class="status-dot"></i>WebGL<span class="footer-slash">/</span><span id="fps">— fps</span></span></footer>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+  <dialog id="guide" aria-labelledby="guide-title">
+    <div class="guide-head"><span class="guide-emblem"><svg class="icon"><use href="#i-guide"/></svg></span><button class="icon-button" id="guide-close" aria-label="Close field guide"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <h2 id="guide-title">Field guide</h2>
+    <p class="guide-intro">Explore a world from above, or fly down to its shoreline.</p>
+    <h3>Camera controls</h3>
+    <dl class="guide-keys">
+      <div><dt>Look around</dt><dd>Drag or <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></dd></div>
+      <div><dt>Orbit distance</dt><dd>Scroll, pinch or <kbd>+</kbd><kbd>−</kbd></dd></div>
+      <div><dt>Fly forward, left, back, right</dt><dd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dd></div>
+      <div><dt>Climb / descend</dt><dd><kbd>E</kbd> / <kbd>Q</kbd></dd></div>
+      <div><dt>Fly faster</dt><dd>Hold <kbd>Shift</kbd></dd></div>
+      <div><dt>Skiff ahead / astern</dt><dd><kbd>W</kbd> / <kbd>S</kbd></dd></div>
+      <div><dt>Steer the skiff</dt><dd><kbd>A</kbd> / <kbd>D</kbd> or drag</dd></div>
+      <div><dt>Switch orbit / fly</dt><dd><kbd>F</kbd></dd></div>
+      <div><dt>Fly the plotted route</dt><dd>Tour</dd></div>
+      <div><dt>Pause / resume tour</dt><dd><kbd>Space</kbd></dd></div>
+      <div><dt>Take over a tour</dt><dd><kbd>F</kbd></dd></div>
+      <div><dt>Return to starting view</dt><dd><kbd>R</kbd></dd></div>
+      <div><dt>Open / close guide</dt><dd><kbd>?</kbd> / <kbd>Esc</kbd></dd></div>
+    </dl>
+    <h3>Survey tools</h3>
+    <p class="guide-intro">Choose <strong>Plot route</strong> and mark two points on the map. You can also move the crosshair with the arrow keys, hold Shift for fine steps, and press Enter to mark each end. Esc cancels the plot.</p>
+    <p class="guide-intro">Drag across the elevation profile or focus it and use the arrow keys to inspect a station. Tour starts there and follows the terrain. The blue area shows water above the lakebed.</p>
+    <p class="guide-intro"><strong>Probe</strong> adds a centre crosshair and draws contours every 2 m, with a heavier line every 10 m. Aim at ground to read elevation, slope and the downhill compass direction. Aim at open water to sound its depth. The diamond on the map locates the reading.</p>
+    <h3>Lake navigation</h3>
+    <p class="guide-intro">Turn on <strong>Depth chart</strong> to see soundings in colour on the lake and map. Ochre marks water shallower than the skiff’s 1.5 m draft. Choose <strong>Skiff</strong> to launch on nearby water. Use W/S for power and reverse, and A/D to steer. On touchscreens, use the arrows. The helm shows speed and depth.</p>
+    <p class="guide-intro">Choose <strong>Chart passage</strong> and mark two points in navigable water. The planner finds a channel around shoals. Choose <strong>Skiff</strong> to cast off at A facing the passage. Follow the striped buoys to the jade finish buoy. Press F to take flight.</p>
+    <h3>Gate relay</h3>
+    <p class="guide-intro">Choose <strong>Start relay</strong> below the profile to line up with the first gate. Use the Fly controls to pass through each gold ring. Your first movement starts the clock. Read your gate splits in the viewer and race your best time on the current course. Open the guide to pause, or choose <strong>End relay</strong> to leave the course.</p>
+    <h3>Basin study</h3>
+    <p class="guide-intro">Compare the original <strong>Fresh</strong> slopes with <strong>Talus</strong> and <strong>Worn</strong>. Each moves loose rock downhill. Adjust <strong>Lake level</strong> to flood the banks or expose the bed. The map shows the shoreline and the readouts measure all ground below that level. Choose <strong>0 m datum</strong> to return to the original shore.</p>
+    <p class="guide-intro">Choose <strong>Trace runoff</strong> and pick high ground on the map, or use the arrows and Enter. A blue line starts at the nearest mesh vertex and follows the slope to water, a hollow, or the survey edge. Moving chevrons show the downhill direction in 3D. Read the drop in the elevation profile or choose <strong>Fly route</strong> to follow it.</p>
+    <p class="guide-intro">Choose Sea mist for low visibility or Squall for wind-driven rain. Weather keeps changing when the clock is held.</p>
+    <h3>Ridge observatory</h3>
+    <p class="guide-intro">Open <strong>Ridge observatory</strong> beneath the clock to survey the skyline from your camera, the station selected on the route profile, or the highest point you can fly to. Drag the bearing marker or use its arrow keys, then choose <strong>Face this bearing</strong> to fly from that station. The sun strip shows when the sun’s centre clears the mapped terrain. Scrub it or jump to the first or last sunlit minute. <strong>Face the sun</strong> holds that minute and points the camera along the sunlight.</p>
+    <p class="guide-note">A preset and seed always recreate the same landscape. Try <strong>Kowloon-Tong</strong> for an after-class flight.</p>
+  </dialog>
+  <dialog id="observatory" aria-labelledby="study-title">
+    <div class="study-head">
+      <div><h2 id="study-title">Ridge observatory</h2><p id="study-place"></p></div>
+      <button type="button" class="icon-button" id="study-close" aria-label="Close ridge observatory"><svg class="icon"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="study-sites" role="group" aria-label="Observation station">
+      <button type="button" id="site-camera" aria-pressed="true"><svg class="icon"><use href="#i-fly"/></svg>Camera position</button>
+      <button type="button" id="site-route" aria-pressed="false"><svg class="icon"><use href="#i-route"/></svg>Route station</button>
+      <button type="button" id="site-summit" aria-pressed="false"><svg class="icon"><use href="#i-ridge"/></svg>Summit</button>
+    </div>
+    <p class="station-coordinates" id="site-coordinates"></p>
+    <div class="study-line"><h3><label for="skyline-bearing">Terrain skyline</label></h3><output id="bearing-label" for="skyline-bearing"></output></div>
+    <div class="skyline-plot" id="skyline-plot">
+      <svg viewBox="0 0 360 112" preserveAspectRatio="none" aria-hidden="true">
+        <path id="skyline-land"/><line id="skyline-zero" x1="0" x2="360"/>
+        <path id="skyline-line"/><line id="skyline-cursor" y1="0" y2="112"/>
+      </svg>
+      <i id="skyline-sun" hidden aria-hidden="true"></i>
+      <input class="plot-slider" type="range" id="skyline-bearing" min="0" max="360" step="1" value="0" aria-label="Skyline bearing in degrees">
+    </div>
+    <div class="plot-scale" aria-hidden="true"><span>N</span><span>E</span><span>S</span><span>W</span><span>N</span></div>
+    <div class="study-reading"><output id="ridge-reading" for="skyline-bearing"></output><button class="minor-button" type="button" id="visit-bearing">Face this bearing</button></div>
+    <div class="sun-study">
+      <div class="study-line"><h3><label for="sun-minute">Direct sunlight</label></h3><span id="sun-duration"></span></div>
+      <p class="study-caption">Gold marks clear-sky minutes when the sun clears the mapped terrain.</p>
+      <div class="sun-strip">
+        <svg viewBox="0 0 1440 16" preserveAspectRatio="none" aria-hidden="true"><rect x="360" y="0" width="720" height="16"/><path id="sun-windows"/><line id="sun-cursor" y1="0" y2="16"/></svg>
+        <input class="plot-slider" type="range" id="sun-minute" min="0" max="1439" step="1" value="990" aria-label="Study time in minutes">
+      </div>
+      <div class="plot-scale" aria-hidden="true"><span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>24h</span></div>
+      <div class="study-reading"><output id="sun-reading" for="sun-minute" aria-live="off"></output>
+        <div class="sun-jumps"><button class="minor-button" type="button" id="first-sun">First sun</button><button class="minor-button" type="button" id="last-sun">Last sun</button><button class="minor-button" type="button" id="face-sun">Face the sun</button></div>
+      </div>
+    </div>
+  </dialog>
+  <noscript>Field Atlas needs JavaScript to generate and draw its landscapes. Enable JavaScript and reload this file.</noscript>
+</body>
+</html>

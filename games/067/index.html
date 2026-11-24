@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#302738">
+  <meta name="description" content="Keep a daily habit journal, build streaks, and uncover a calendar of pixel-art rewards.">
+  <title>Overview · Embertrail</title>
+  <link rel="icon" href="./assets/ember.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./js/model.js"></script>
+  <script defer src="./js/storage.js"></script>
+  <script defer src="./js/art.js"></script>
+  <script defer src="./js/views.js"></script>
+  <script defer src="./js/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to journal</a>
+  <div id="sprite-bank" aria-hidden="true"></div>
+  <div class="app-shell">
+    <aside id="sidebar" class="sidebar" aria-label="Journal navigation"></aside>
+    <main id="main-content" tabindex="-1"></main>
+  </div>
+  <dialog id="journal-dialog" aria-labelledby="dialog-title">
+    <div id="dialog-content"></div>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript>Enable JavaScript to open your Embertrail journal. All journal data stays on this device.</noscript>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#101412">
+  <title>Typhoon visualizer · Isobar Storm Lab</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="js/math.js"></script>
+  <script defer src="js/lighting.js"></script>
+  <script defer src="js/storm.js"></script>
+  <script defer src="js/field.js"></script>
+  <script defer src="js/doppler.js"></script>
+  <script defer src="js/lifecycle.js"></script>
+  <script defer src="js/relief.js"></script>
+  <script defer src="js/drift.js"></script>
+  <script defer src="js/recorder.js"></script>
+  <script defer src="js/section.js"></script>
+  <script defer src="js/notebook.js"></script>
+  <script defer src="js/geometry.js"></script>
+  <script defer src="js/textures.js"></script>
+  <script defer src="js/shaders.js"></script>
+  <script defer src="js/renderer.js"></script>
+  <script defer src="js/ui.js"></script>
+  <script defer src="js/gestures.js"></script>
+  <script defer src="js/drift-panel.js"></script>
+  <script defer src="js/imagery-panel.js"></script>
+  <script defer src="js/instruments.js"></script>
+  <script defer src="js/station-panel.js"></script>
+  <script defer src="js/section-panel.js"></script>
+  <script defer src="js/notebook-panel.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="shell masthead-inner">
+      <div class="brand" aria-label="Isobar Storm Lab">
+        <canvas class="brand-mark" data-icon="isobar" aria-hidden="true"></canvas>
+        <span class="brand-name">Isobar</span><span class="brand-divider"></span><span class="brand-lab">Storm lab</span>
+      </div>
+      <div class="header-actions">
+        <span class="system-state" id="system-state" role="status"><i class="status-dot"></i><span id="status-text">Initializing</span></span>
+        <button class="help-button" id="help-open" type="button" aria-label="Show controls" title="Show controls (?)">
+          <canvas data-icon="keyboard" aria-hidden="true"></canvas><span>Controls</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="intro">
+      <div>
+        <h1>Typhoon visualizer</h1>
+        <p>Raise the warning signal to see the cloud bands tighten and the rainfall build.</p>
+      </div>
+      <div class="station">
+        <span class="station-name"><canvas data-icon="pin" aria-hidden="true"></canvas>Kowloon Tong, HK</span>
+        <span class="coordinates">22.34° N &nbsp; 114.18° E</span>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <section class="viewport panel" id="viewport" aria-labelledby="viewport-title">
+        <div class="stage" id="stage">
+          <canvas class="storm-canvas" id="storm-canvas" tabindex="0" aria-label="Three-dimensional typhoon. Drag to orbit and scroll to zoom. Keyboard controls are available in the Controls menu."></canvas>
+          <div class="stage-shade"></div>
+          <div class="stage-toolbar">
+            <h2 id="viewport-title" class="visually-hidden">Storm viewport</h2>
+            <div class="imagery-switch" role="group" aria-label="Storm imagery">
+              <button type="button" data-imagery="cloud" aria-pressed="true"><canvas data-icon="cloud" aria-hidden="true"></canvas>Cloud view</button>
+              <button type="button" data-imagery="radar" aria-pressed="false" aria-controls="radar-products"><canvas data-icon="radar" aria-hidden="true"></canvas>Radar</button>
+              <button type="button" data-imagery="wind" aria-pressed="false"><canvas data-icon="flow" aria-hidden="true"></canvas>Wind field</button>
+              <button type="button" data-imagery="pressure" aria-pressed="false" title="Pressure relief (I)"><canvas data-icon="relief" aria-hidden="true"></canvas>Pressure</button>
+            </div>
+            <div class="stage-actions">
+              <button class="stage-button probe-button" id="probe-toggle" type="button" aria-label="Surface probe" aria-pressed="false" aria-controls="probe-tray" title="Surface probe (P)">
+                <canvas data-icon="pin" aria-hidden="true"></canvas><span>Probe</span>
+              </button>
+              <button class="square stage-button" id="pause" type="button" aria-label="Pause simulation" title="Pause simulation (Space)">
+                <canvas data-icon="pause" aria-hidden="true"></canvas>
+              </button>
+              <button class="square stage-button" id="expand" type="button" aria-label="Expand viewport" aria-pressed="false" title="Expand viewport (F)">
+                <canvas data-icon="expand" aria-hidden="true"></canvas>
+              </button>
+            </div>
+          </div>
+          <div class="map-markers" aria-hidden="true">
+            <div class="eye-marker" id="eye-marker"><i></i><span>Eye</span></div>
+            <div class="probe-marker" id="probe-marker" hidden><i></i><span>Probe</span></div>
+            <span class="compare-caption" id="compare-map-name" hidden></span>
+          </div>
+          <div class="cloud-markers" id="cloud-markers" aria-hidden="true" hidden>
+            <div class="eye-marker" id="cloud-eye"><i></i><span>Eye</span></div>
+            <div class="probe-marker" id="cloud-probe" hidden><i></i><span>Probe</span></div>
+            <span class="compare-caption">Cloud view</span>
+          </div>
+          <div class="compare-divider" id="compare-divider" hidden>
+            <input id="compare-position" type="range" min="0" max="100" step="1" value="50" aria-label="Cloud share of the comparison" title="Drag to compare clouds and the map">
+            <span class="compare-grip" aria-hidden="true">‹ ›</span>
+          </div>
+          <div class="stage-bottom">
+            <canvas class="compass" id="compass" aria-label="North indicator"></canvas>
+            <span class="model-time" title="Elapsed simulation time"><canvas data-icon="clock" aria-hidden="true"></canvas><span id="model-time">T+ 00:00</span></span>
+          </div>
+          <div class="graphics-message" id="graphics-message" role="alert" hidden>
+            <div class="message-icon"><canvas data-icon="focus" aria-hidden="true"></canvas></div>
+            <h3 id="graphics-title"></h3><p id="graphics-detail"></p>
+          </div>
+          <noscript><div class="noscript">Enable JavaScript to run the 3D storm simulation.</div></noscript>
+        </div>
+        <div class="radar-products" id="radar-products" hidden>
+          <div class="product-switch" role="group" aria-label="Radar product">
+            <button type="button" data-product="radar" aria-pressed="true">Rain rate</button>
+            <button type="button" data-product="doppler" aria-pressed="false">Doppler wind</button>
+          </div>
+          <div class="radar-sites" id="radar-sites" role="group" aria-label="Radar antenna site" hidden>
+            <span>Radar site</span><button type="button" data-site="campus" aria-pressed="true">Campus roof</button>
+            <button type="button" data-site="pier" aria-pressed="false">Ferry pier</button>
+            <button type="button" id="radar-place" title="Place the antenna at the open probe">Use probe</button>
+            <span id="radar-coordinates" role="status"></span>
+          </div>
+        </div>
+        <div class="radar-key" id="radar-key" hidden>
+          <span>Rain <b>mm/h</b></span>
+          <div class="radar-swatches" aria-label="Rain band lower bounds"><span data-band="0"></span><span data-band="1"></span><span data-band="2"></span><span data-band="3"></span><span data-band="4"></span><span data-band="5"></span></div>
+          <span id="radar-rings">30 km rings</span>
+        </div>
+        <div class="doppler-key" id="doppler-key" hidden>
+          <span>Toward</span>
+          <div class="wind-ramp" id="doppler-ramp" aria-label="Signed radial wind speed in kilometres per hour">
+            <span data-velocity="0"></span><span data-velocity="1"></span><span data-velocity="2"></span><span data-velocity="3"></span><span data-velocity="4"></span>
+          </div>
+          <span>Away · km/h</span>
+        </div>
+        <div class="map-wind-key" id="wind-key" hidden>
+          <span>Wind <b>km/h</b></span>
+          <div class="wind-ramp" id="wind-ramp" aria-label="Wind speed scale">
+            <span data-stop="0"></span><span data-stop="1"></span><span data-stop="2"></span><span data-stop="3"></span><span data-stop="4"></span><span data-stop="5"></span>
+          </div>
+          <span id="wind-rings">30 km rings</span>
+        </div>
+        <div class="map-pressure-key" id="pressure-key" hidden>
+          <span>Pressure <b>hPa</b></span>
+          <div class="wind-ramp" id="pressure-ramp" aria-label="Pressure scale">
+            <span data-isobar="0"></span><span data-isobar="1"></span><span data-isobar="2"></span><span data-isobar="3"></span><span data-isobar="4"></span>
+          </div>
+          <span>10 hPa contours</span>
+        </div>
+        <div class="view-footer">
+          <div class="view-switch" role="group" aria-label="Camera view">
+            <button type="button" data-view="orbit" aria-pressed="true"><canvas data-icon="orbit" aria-hidden="true"></canvas>Orbit</button>
+            <button type="button" data-view="overhead" aria-pressed="false"><canvas data-icon="overhead" aria-hidden="true"></canvas>Top-down</button>
+          </div>
+          <button class="section-toggle" id="section-toggle" type="button" aria-label="Eyewall section" aria-controls="section-tray" aria-expanded="false" title="Eyewall section (X)">
+            <canvas data-icon="section" aria-hidden="true"></canvas>Section
+          </button>
+          <button class="section-toggle compare-toggle" id="compare-toggle" type="button" aria-pressed="false" aria-controls="compare-divider" title="Compare clouds and map (C)">
+            <canvas data-icon="compare" aria-hidden="true"></canvas>Compare
+          </button>
+          <div class="viewport-signal" id="viewport-signal-control" hidden>
+            <label for="viewport-signal">Warning signal</label>
+            <input id="viewport-signal" type="range" min="1" max="10" step="1" value="5" aria-valuetext="5 of 10, Strong">
+            <output id="viewport-signal-output" for="viewport-signal">05 / 10</output>
+          </div>
+          <span class="gesture-hint"><span class="mouse-hint">Drag to orbit <b>·</b> Scroll to zoom</span><span class="touch-hint">Drag to orbit <b>·</b> Pinch to zoom</span></span>
+          <button class="reset-button" id="reset-view" type="button" aria-label="Reset view" title="Reset camera (R)"><canvas data-icon="reset" aria-hidden="true"></canvas><span>Reset view</span></button>
+        </div>
+        <section class="section-tray" id="section-tray" aria-labelledby="section-title" hidden>
+          <div class="section-heading">
+            <h3 id="section-title">Eyewall section</h3>
+            <div class="section-metrics" role="group" aria-label="Profile reading">
+              <button type="button" data-metric="wind" aria-pressed="true">Wind</button>
+              <button type="button" data-metric="rain" aria-pressed="false">Rain</button>
+              <button type="button" data-metric="pressure" aria-pressed="false">Pressure</button>
+            </div>
+          </div>
+          <div class="section-bearing">
+            <label for="section-bearing">Axis bearing</label>
+            <input id="section-bearing" type="range" min="0" max="355" step="5" value="90">
+            <output id="section-angle" for="section-bearing">090° E</output>
+            <span class="profile-unit" id="profile-unit">Surface wind (km/h)</span>
+          </div>
+          <div class="profile-graph">
+            <div class="profile-scale" aria-hidden="true"><span id="profile-max">200</span><span id="profile-min">0</span></div>
+            <div class="profile-plot" id="profile-plot">
+              <canvas id="profile-curve" aria-hidden="true"></canvas>
+              <label class="visually-hidden" for="section-distance">Sample position along the section</label>
+              <input id="section-distance" type="range" min="-120" max="120" step="2" value="0">
+            </div>
+            <div class="profile-axis" aria-hidden="true"><span id="section-start">120 km W</span><span>Eye</span><span id="section-end">120 km E</span></div>
+          </div>
+          <div class="section-sample"><span id="section-reading"></span><button type="button" class="manual-button" id="section-probe">Place probe here</button></div>
+        </section>
+        <section class="probe-tray" id="probe-tray" aria-labelledby="probe-title" hidden>
+          <div class="probe-heading"><h3 id="probe-title"><canvas data-icon="pin" aria-hidden="true"></canvas>Surface probe</h3><span id="probe-location"></span></div>
+          <dl class="probe-readings">
+            <div><dt>Local wind</dt><dd><span id="probe-wind"></span> km/h</dd></div>
+            <div><dt>Local rain</dt><dd><span id="probe-rain"></span> mm/h</dd></div>
+            <div><dt>Pressure</dt><dd><span id="probe-pressure"></span> hPa</dd></div>
+            <div><dt>Flow toward</dt><dd><span id="probe-flow"></span></dd></div>
+            <div id="radial-reading" hidden><dt>Radial wind</dt><dd><span id="probe-radial"></span></dd></div>
+          </dl>
+          <div class="probe-placement">
+            <div class="probe-presets" role="group" aria-label="Place surface probe">
+              <button type="button" data-probe="eye">Eye</button><button type="button" data-probe="wall">Eyewall</button><button type="button" data-probe="band">Outer band</button>
+            </div>
+            <span id="probe-hint" role="status">Tap the sea to move the probe.</span>
+          </div>
+          <div class="drift-panel">
+            <div class="drift-controls">
+              <h4>Parcel drift</h4>
+              <div class="drift-horizons" role="group" aria-label="Parcel travel time">
+                <button type="button" data-horizon="15" aria-pressed="false">15 min</button>
+                <button type="button" data-horizon="30" aria-pressed="true">30 min</button>
+                <button type="button" data-horizon="60" aria-pressed="false">60 min</button>
+              </div>
+              <button class="manual-button" id="drift-release" type="button">Trace from probe</button>
+            </div>
+            <p class="drift-summary" id="drift-summary" role="status">Trace a parcel through the wind measured at release.</p>
+            <div class="drift-result" id="drift-result" hidden>
+              <span class="trail-key"><i></i> Release <b></b> Arrival</span>
+              <button class="manual-button" id="drift-inspect" type="button">Probe arrival</button>
+              <button class="quiet-button" id="drift-clear" type="button">Clear trail</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <aside class="control-panel panel" aria-label="Simulation controls">
+        <section class="signal-section">
+          <h2><label for="signal">Warning signal</label></h2>
+          <div class="signal-reading">
+            <div class="signal-numbers"><output id="signal-output" for="signal">05</output><span>/ 10</span></div>
+            <span class="intensity-badge"><canvas data-icon="signal" aria-hidden="true"></canvas><span id="level-name">Strong</span></span>
+          </div>
+          <div class="range-row">
+            <button class="square step-button" id="signal-down" type="button" aria-label="Lower warning signal"><canvas data-icon="minus" aria-hidden="true"></canvas></button>
+            <div class="range-body">
+              <input id="signal" type="range" min="1" max="10" step="1" value="5" aria-valuetext="5 of 10, Strong">
+              <div class="range-scale" aria-hidden="true"><span>1</span><span>5</span><span>10</span></div>
+            </div>
+            <button class="square step-button" id="signal-up" type="button" aria-label="Raise warning signal"><canvas data-icon="plus" aria-hidden="true"></canvas></button>
+          </div>
+        </section>
+        <section class="layer-section">
+          <h2>Display layers</h2>
+          <div class="layer-list">
+            <label class="layer-row"><canvas data-icon="cloud" aria-hidden="true"></canvas><span>Cloud bands</span><input type="checkbox" role="switch" data-layer="clouds" checked><i class="switch-track" aria-hidden="true"></i></label>
+            <label class="layer-row"><canvas data-icon="rain" aria-hidden="true"></canvas><span>Rain streaks</span><input type="checkbox" role="switch" data-layer="rain" checked><i class="switch-track" aria-hidden="true"></i></label>
+            <label class="layer-row"><canvas data-icon="grid" aria-hidden="true"></canvas><span>Reference grid</span><input type="checkbox" role="switch" data-layer="grid" checked><i class="switch-track" aria-hidden="true"></i></label>
+          </div>
+          <div class="lighting-control">
+            <label for="light-time">Sky lighting</label><output id="light-reading" for="light-time">15:00</output>
+            <input id="light-time" type="range" min="0" max="1440" step="15" value="900" aria-valuetext="15:00, Daylight">
+            <div class="light-scale"><span>Midnight</span><span>Noon</span><span>Midnight</span></div>
+          </div>
+          <p class="layer-note" id="layer-note" hidden>Cloud layers and lighting are available in Cloud view and Compare.</p>
+        </section>
+        <section class="speed-section">
+          <h2>Playback speed</h2>
+          <div class="speed-switch" role="group" aria-label="Playback speed">
+            <button type="button" data-speed="0.5" aria-pressed="false">0.5×</button>
+            <button type="button" data-speed="1" aria-pressed="true">1×</button>
+            <button type="button" data-speed="2" aria-pressed="false">2×</button>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <section class="telemetry" aria-label="Simulated storm readings">
+      <article class="metric panel wind">
+        <h2><canvas data-icon="wind" aria-hidden="true"></canvas>Wind speed</h2>
+        <div class="metric-body"><div class="metric-reading"><span id="wind-value">95</span><span class="unit">km/h</span></div><canvas class="spark" id="wind-chart" aria-hidden="true"></canvas></div>
+      </article>
+      <article class="metric panel rainfall">
+        <h2><canvas data-icon="rain" aria-hidden="true"></canvas>Rainfall rate</h2>
+        <div class="metric-body"><div class="metric-reading"><span id="rain-value">25.7</span><span class="unit">mm/h</span></div><canvas class="spark" id="rain-chart" aria-hidden="true"></canvas></div>
+      </article>
+      <article class="metric panel pressure">
+        <h2><canvas data-icon="pressure" aria-hidden="true"></canvas>Central pressure</h2>
+        <div class="metric-body"><div class="metric-reading"><span id="pressure-value">970</span><span class="unit">hPa</span></div><canvas class="spark" id="pressure-chart" aria-hidden="true"></canvas></div>
+      </article>
+    </section>
+    <section class="cycle-panel panel" aria-labelledby="cycle-title">
+      <div class="cycle-heading">
+        <div><h2 id="cycle-title">Storm life cycle</h2><p>Follow a 60-second storm. Scrub the curve or choose a stage to pause there.</p></div>
+        <div class="cycle-actions">
+          <button class="manual-button" id="cycle-exit" type="button" hidden>Return to manual</button>
+          <button class="cycle-play" id="cycle-play" type="button"><canvas data-icon="play" aria-hidden="true"></canvas><span id="cycle-play-label">Play life cycle</span></button>
+        </div>
+      </div>
+      <div class="cycle-axis"><span>Warning signal</span><span><strong id="cycle-stage">Manual control</strong> · <span id="cycle-position">00:00 / 01:00</span></span></div>
+      <div class="cycle-plot" id="cycle-plot">
+        <div class="cycle-track"><canvas class="cycle-curve" id="cycle-curve" aria-hidden="true"></canvas></div>
+        <label class="visually-hidden" for="cycle-time">Life cycle time</label>
+        <input id="cycle-time" type="range" min="0" max="60" step="0.1" value="0" aria-valuetext="0 seconds, Formation">
+      </div>
+      <div class="cycle-chapters" id="cycle-chapters" role="group" aria-label="Jump to a storm stage">
+        <button type="button" data-stage="0">Formation</button>
+        <button type="button" data-stage="1">Deepening</button>
+        <button type="button" data-stage="2">Peak</button>
+        <button type="button" data-stage="3">Decay</button>
+      </div>
+    </section>
+    <section class="station-panel panel" aria-labelledby="recorder-title">
+      <div class="notebook-heading">
+        <div><h2 id="recorder-title"><canvas data-icon="recorder" aria-hidden="true"></canvas>Station recorder</h2>
+          <p>Pin the open probe or record at the eyewall. The station stays in place as the bands pass.</p></div>
+        <div class="log-actions">
+          <button id="station-record" type="button">Record at eyewall</button>
+          <a id="station-export" download="isobar-station.csv" hidden>Save CSV</a>
+        </div>
+      </div>
+      <div class="log-sheet" id="station-sheet" hidden>
+        <div class="log-chart">
+          <div class="log-chart-heading"><span>Local rain <strong id="station-rate"></strong> <b>mm/h</b></span><span id="station-elapsed"></span></div>
+          <div class="log-plot"><span id="station-scale"></span><canvas id="station-chart" aria-hidden="true"></canvas></div>
+          <div class="log-axis" aria-hidden="true"><span>0 s</span><span id="station-span"></span></div>
+        </div>
+        <dl class="log-stats">
+          <div><dt>Rain collected</dt><dd><strong id="station-total"></strong> mm</dd></div>
+          <div><dt>Peak wind</dt><dd><strong id="station-peak"></strong> km/h</dd></div>
+          <div><dt>Lowest pressure</dt><dd><strong id="station-low"></strong> hPa</dd></div>
+        </dl>
+      </div>
+      <p class="log-status" id="station-status" role="status">One sample per model second for up to two minutes.</p>
+    </section>
+    <section class="notebook-panel panel" aria-labelledby="notebook-title">
+      <div class="notebook-heading">
+        <div><h2 id="notebook-title"><canvas data-icon="book" aria-hidden="true"></canvas>Field notebook</h2><p>Capture the surface probe, or the eye when the probe is closed.</p></div>
+        <div class="notebook-actions" role="group" aria-label="Capture an observation">
+          <button type="button" data-capture="A">Capture A</button><button type="button" data-capture="B">Capture B</button>
+        </div>
+      </div>
+      <div class="notebook-sheet" id="notebook-sheet" hidden>
+        <table aria-label="Saved observations and differences">
+          <thead><tr><th scope="col">Reading</th><th scope="col">A</th><th scope="col">B</th><th scope="col">B − A</th></tr></thead>
+          <tbody>
+            <tr class="sample-site"><th scope="row">Station</th><td id="site-A">—</td><td id="site-B">—</td><td>—</td></tr>
+            <tr><th scope="row">Wind <small>km/h</small></th><td id="wind-A">—</td><td id="wind-B">—</td><td id="wind-diff">—</td></tr>
+            <tr><th scope="row">Rain <small>mm/h</small></th><td id="rain-A">—</td><td id="rain-B">—</td><td id="rain-diff">—</td></tr>
+            <tr><th scope="row">Pressure <small>hPa</small></th><td id="pressure-A">—</td><td id="pressure-B">—</td><td id="pressure-diff">—</td></tr>
+          </tbody>
+        </table>
+        <div class="notebook-records">
+          <div id="record-A" hidden><button type="button" data-recall="A">Inspect A</button><button type="button" data-clear="A">Clear A</button></div>
+          <div id="record-B" hidden><button type="button" data-recall="B">Inspect B</button><button type="button" data-clear="B">Clear B</button></div>
+        </div>
+      </div>
+      <p class="notebook-status" id="notebook-status" role="status">HKBU field practical · Try the eye in A and the eyewall in B.</p>
+    </section>
+    <footer class="page-footer"><span class="footer-line"></span><span>Idealized storm model · Not a weather advisory</span></footer>
+  </main>
+
+  <dialog id="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-heading"><h2 id="help-title">Controls</h2><button type="button" class="square" id="help-close" aria-label="Close controls" autofocus><canvas data-icon="close" aria-hidden="true"></canvas></button></div>
+    <p>Drag the storm to orbit. Scroll or pinch to bring the eye closer.</p>
+    <dl class="shortcut-list">
+      <div><dt>Warning signal</dt><dd><kbd>↑</kbd> <kbd>↓</kbd></dd></div>
+      <div><dt>Pause / resume</dt><dd><kbd>Space</kbd></dd></div>
+      <div><dt>Orbit camera</dt><dd><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></dd></div>
+      <div><dt>Zoom</dt><dd><kbd>+</kbd> <kbd>−</kbd></dd></div>
+      <div><dt>Orbit / top-down view</dt><dd><kbd>O</kbd> <kbd>T</kbd></dd></div>
+      <div><dt>Reset camera</dt><dd><kbd>R</kbd></dd></div>
+      <div><dt>Cloud view / rain radar</dt><dd><kbd>V</kbd></dd></div>
+      <div><dt>Doppler wind / cloud view</dt><dd><kbd>B</kbd></dd></div>
+      <div><dt>Compare clouds and map</dt><dd><kbd>C</kbd></dd></div>
+      <div><dt>Wind field / cloud view</dt><dd><kbd>G</kbd></dd></div>
+      <div><dt>Pressure relief / cloud view</dt><dd><kbd>I</kbd></dd></div>
+      <div><dt>Open / close eyewall section</dt><dd><kbd>X</kbd></dd></div>
+      <div><dt>Surface probe</dt><dd><kbd>P</kbd></dd></div>
+      <div><dt>Move probe 5 km on the canvas</dt><dd><kbd>Shift</kbd> + <kbd>Arrows</kbd></dd></div>
+      <div><dt>Expand viewport</dt><dd><kbd>F</kbd></dd></div>
+      <div><dt>Show controls</dt><dd><kbd>?</kbd></dd></div>
+    </dl>
+    <p class="dialog-note">Radar offers rain rate and Doppler wind. Teal wind moves toward the marked antenna and amber wind moves away. Choose a site or use the open probe as the antenna. The probe shows a dash at the antenna and the eye. Radar rings are 30 km apart.</p>
+    <p class="dialog-note">Compare puts clouds on the left and the selected map on the right. Drag the handle or focus it and use the arrow keys. Sky lighting sets the sun or moon angle in Cloud view, including during a comparison.</p>
+    <p class="dialog-note">With the probe open, tap a point within 120 km of the eye or use a placement button. Shift + ↑ moves north. Dragging the scene still orbits.</p>
+    <p class="dialog-note">The life cycle curve follows four stages. Scrub to freeze an instant. Change the warning signal to take manual control from that point.</p>
+    <p class="dialog-note">Wind field arrows point with the surface flow. Colour shows speed in km/h. Section cuts away the near side of the clouds and rain. Rotate its axis and drag across the profile to sample the amber line.</p>
+    <p class="dialog-note">In the field notebook, capture A and B to compare readings. Inspect a slot to pause at its saved time and probe position. Capturing again replaces that slot.</p>
+    <p class="dialog-note">In Pressure, lower pressure sits deeper. Pale contours are 10 hPa apart. Orbit the bowl or tap its surface with the probe.</p>
+    <p class="dialog-note">In the probe tray, choose a travel time and trace a parcel. The coral trail uses the wind at release. Probe arrival samples its destination in the current storm.</p>
+    <p class="dialog-note">The station recorder samples a fixed location during playback. Stop to save its CSV. Seeking a different storm instant finishes the log.</p>
+  </dialog>
+</body>
+</html>

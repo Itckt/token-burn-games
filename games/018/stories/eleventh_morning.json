@@ -1,0 +1,348 @@
+{
+  "id": "eleventh-morning",
+  "title": "The Eleventh Morning",
+  "intro": "At Kowloon Tong station, you nearly swipe away a message from Hong Kong Baptist University. A departing lab has assigned its remaining 10,000,000,000 AI tokens to your student account. They expire at midnight on day 10. Underneath are two messages from friends. Yan has sent a photo of a rain-blurred route map. Bo, who runs the campus print room, has sent a photo of an open biscuit tin full of paper.",
+  "resource": "AI tokens",
+  "budget": 10000000000,
+  "days": 10,
+  "start": "station",
+  "flags": {
+    "route-notes": "Yan's route notes",
+    "map-master": "a finished map master",
+    "map-up": "a public rain map",
+    "voices": "Bo's signed recordings",
+    "finding-aid": "an index to the tin",
+    "archive-open": "an open reading drawer",
+    "relay-built": "the Six Seats prototype",
+    "stewards": "two trained student stewards",
+    "turn-on-air": "Yan's crossing on the listening button",
+    "ticket-on-air": "the printers' dance on the listening button",
+    "hatch-key": "Bo's supper hatch key",
+    "tiles-up": "reversible tiles at the supper hatch"
+  },
+  "items": {
+    "blank": "blank loop tape",
+    "turn-take": "crossing field tape",
+    "ticket-take": "dance ticket field tape",
+    "supper-slip": "marked supper slip",
+    "tile-proof": "print-ready tile proof"
+  },
+  "notices": {
+    "4": "Rain drums on the covered walk. A stranger asks whether the far end comes out by the library.",
+    "7": "Someone slips a note under your door. It says, in very small writing, 'Who do we ask after you leave?'",
+    "10": "The computing office sends its last reminder. The queue closes at midnight tonight."
+  },
+  "rooms": {
+    "station": {
+      "name": "Station concourse",
+      "description": "Water from folded umbrellas darkens the floor. Yan runs an information table beside the public noticeboard. From here a covered walk leads to your study desk, and a side street leads to Bo's print room.",
+      "details": {
+        "map-up": "A small crowd consults the new rain map. Yan has finally put her pencil away."
+      },
+      "exits": ["desk", "press"],
+      "people": {
+        "yan": {
+          "name": "Yan",
+          "greeting": "Yan tips the water off the awning with the end of her umbrella. 'Did you hear that from the stairs?'",
+          "topics": {
+            "button": {
+              "name": "Ask about the button on the landing",
+              "result": "'Wai-lam got the old listening booth working again. Go through the study desk or the print room. There's one blank tape left. Walk the route with me and we can put the hard turn on it.'"
+            },
+            "crossing": {
+              "name": "Use the tape for the crossing",
+              "requires": ["route-notes"],
+              "consumes": {"blank": 1},
+              "produces": {"turn-take": 1},
+              "result": "Yan holds the recorder inside her coat. First comes the rattle of the locked gate, then four footsteps to the left and the hollow drip under the awning. She rewinds it. 'There. That's the turn.' Take the field tape to the listening booth."
+            }
+          }
+        }
+      },
+      "actions": {
+        "walk": {
+          "name": "Walk the rainy route with Yan",
+          "gives": ["route-notes"],
+          "result": "Halfway to campus, Yan takes a sharp left where the old map says to go straight. A gate has been chained shut for years. You walk both approaches and mark the turn by hand. Back at your study desk, these notes will be enough to make a map master."
+        },
+        "post": {
+          "name": "Print and post the rain map",
+          "cost": 500000000,
+          "requires": ["map-master"],
+          "gives": ["map-up"],
+          "result": "You run the last batch of accessible labels and bring the sheets downstairs. Yan gives the first person off the train no directions at all. He checks the map, finds the left turn and keeps his book tucked dry under his arm."
+        }
+      }
+    },
+    "desk": {
+      "name": "Study desk",
+      "description": "A patch of afternoon sun fits exactly between your keyboard and the kettle. Yan's booking slip has space for one print master. The pocket edition needs two days of folding trials. A larger batch can lay out an entire wall in a day.",
+      "details": {
+        "map-master": "A proof sits under the kettle to flatten. Someone has written 'tested in actual rain' in the margin."
+      },
+      "exits": ["station", "common", "booth"],
+      "batches": {
+        "proof": {
+          "name": "Proof Siu's tiles in two passes",
+          "nights": 2,
+          "cost": 800000000,
+          "consumes": {"supper-slip": 1},
+          "produces": {"tile-proof": 1},
+          "result": "The first pass fits the lettering. The second checks it from the back of the queue. On the finished proof you can tell the price of soup from the number of bowls left. Take it to Siu at the supper hatch."
+        },
+        "proof-rush": {
+          "name": "Proof Siu's tiles overnight",
+          "nights": 1,
+          "cost": 2000000000,
+          "consumes": {"supper-slip": 1},
+          "produces": {"tile-proof": 1},
+          "result": "A page of parallel trials comes back. One pair reads clearly at arm's length and from six places back in the queue. The little bowl on Siu's slip has made it onto both sides. Take the proof to the supper hatch."
+        }
+      },
+      "actions": {
+        "fold": {
+          "name": "Lay out a pocket edition",
+          "days": 2,
+          "cost": 1500000000,
+          "requires": ["route-notes"],
+          "unless": ["map-master"],
+          "gives": ["map-master"],
+          "result": "On the first day the model puts a fold right through the important turn. On the second you move the crease a thumb's width. The whole wet-weather route now fits inside a student ID sleeve. The master is ready for the station printer."
+        },
+        "tile": {
+          "name": "Render a tiled wall edition",
+          "cost": 5000000000,
+          "requires": ["route-notes"],
+          "unless": ["map-master"],
+          "gives": ["map-master"],
+          "result": "You queue parallel layouts for every panel and spend the afternoon lining up their edges on the floor. The critical left turn is now the size of your hand. You roll the master into a tube for the station."
+        }
+      }
+    },
+    "press": {
+      "name": "Print room",
+      "description": "Bo keeps the biscuit tin on the counter between a paper knife and a cold cup of tea. Inside are offcuts from decades of student printing. She can tell you who made each one. A reading drawer beneath the counter slides open to the street.",
+      "details": {
+        "voices": "Three signed permissions sit with the recordings. Each speaker chose the name that will go on their slip.",
+        "archive-open": "The reading drawer sticks a little now. A visitor has put a new print in it."
+      },
+      "exits": ["station", "common", "booth", "hatch"],
+      "exit_requires": {"hatch": ["hatch-key"]},
+      "people": {
+        "bo": {
+          "name": "Bo",
+          "greeting": "Bo lifts the dance ticket out of the tin by its edges. 'They hired the hall until nine. Listen to the last thing they did before they gave back the key.'",
+          "topics": {
+            "ticket": {
+              "name": "Use the tape for the dance ticket",
+              "requires": ["voices"],
+              "consumes": {"blank": 1},
+              "produces": {"ticket-take": 1},
+              "result": "Bo reads the three credit lines aloud, then records the printers tapping out the last dance on her counter. They listen back and agree to let people hear it on the landing. Bo pencils their names on the tape box. Wai-lam has the player in the listening booth."
+            },
+            "names": {
+              "name": "Bring back word from the landing",
+              "requires": ["ticket-on-air"],
+              "result": "You tell Bo that people have been staying to hear the credits. She pulls a fourth chair up to the counter. 'Then the next person who remembers something can sit right here.'"
+            },
+            "hatch": {
+              "name": "Sign out the supper hatch key",
+              "gives": ["hatch-key"],
+              "result": "Bo takes a brass key from the nail beside the tin. 'Siu next door wants something for her supper queue. Sign here so I know who has the key.' Through the service door you can hear a ladle strike the bottom of a pot."
+            }
+          }
+        }
+      },
+      "actions": {
+        "listen": {
+          "name": "Record the stories behind the offcuts",
+          "gives": ["voices"],
+          "result": "Bo invites two former printers over. One offcut is a dance ticket with the date corrected in pencil. All three agree to record a memory and choose a credit line. You save their signed slips with the audio. They ask for an index that people can leaf through."
+        },
+        "index": {
+          "name": "Index the recordings in small batches",
+          "days": 2,
+          "cost": 2500000000,
+          "requires": ["voices"],
+          "unless": ["finding-aid"],
+          "gives": ["finding-aid"],
+          "result": "The first transcript calls the dance a dinner. You and Bo listen again and hear shoes sliding on a wooden floor. Checking small batches takes another day, but the finished cards carry the words their speakers chose."
+        },
+        "rush": {
+          "name": "Index the recordings in parallel",
+          "cost": 4000000000,
+          "requires": ["voices"],
+          "unless": ["finding-aid"],
+          "gives": ["finding-aid"],
+          "result": "You book enough compute for several independent transcripts of each memory. Bo spends the afternoon settling the lines where they disagree. By closing time every offcut has a card with its maker's own words."
+        },
+        "file": {
+          "name": "Open the reading drawer",
+          "cost": 500000000,
+          "requires": ["finding-aid"],
+          "gives": ["archive-open"],
+          "result": "A final matching pass pairs each recording with its paper slip. Bo ties a cotton loop to the drawer handle so small hands can reach it. Before you can put away the scissors, somebody pulls it open."
+        }
+      }
+    },
+    "common": {
+      "name": "Common room",
+      "description": "A long table links two sofas of different heights. This is where people try things out between lectures, and where the next shift meets before yours goes home.",
+      "details": {
+        "relay-built": "Six chair legs have left a neat ring in the carpet.",
+        "stewards": "Two students are comparing handwritten copies of the workshop instructions."
+      },
+      "exits": ["desk", "press"],
+      "actions": {
+        "relay": {
+          "name": "Prototype Six Seats",
+          "cost": 500000000,
+          "gives": ["relay-built"],
+          "result": "Six phones become a court for two teams of three. Each player can see only a teammate's next stepping stone. A small model generates the courts in advance. Your friends play three rounds and insist the chipped sugar bowl is now a trophy."
+        },
+        "handover": {
+          "name": "Teach the next shift",
+          "days": 2,
+          "cost": 1500000000,
+          "requires": ["map-up", "archive-open"],
+          "gives": ["stewards"],
+          "result": "On the first day you make a set of offline practice files from the map and the drawer. On the second, two students swap jobs. One corrects a route label. The other files a new recording. Neither looks over at you. You put the kettle on."
+        }
+      }
+    },
+    "booth": {
+      "name": "Listening booth",
+      "description": "A square button on the landing is wired through the wall to an old loop player. Someone has worn a thumbprint into the paint. The edit bench is shared with a class. Your booking covers days 4 through 7.",
+      "details": {
+        "turn-on-air": "A wet umbrella leans against the wall. Its owner has stopped to hear the crossing twice.",
+        "ticket-on-air": "The listener at the button taps one heel against the skirting board."
+      },
+      "exits": ["desk", "press"],
+      "people": {
+        "wai": {
+          "name": "Wai-lam",
+          "greeting": "Wai-lam screws the cover back onto the player. 'Works now. All it needs is something worth pressing the button for.'",
+          "topics": {
+            "tape": {
+              "name": "Borrow the last blank tape",
+              "produces": {"blank": 1},
+              "result": "Wai-lam puts the loop in your palm. 'Give it to Yan after you've walked the crossing, or to Bo after the printers have signed. Whoever gets it can fill the whole thing.' The box is just the right size for your coat pocket."
+            },
+            "booking": {
+              "name": "Check the bench booking",
+              "result": "Wai-lam opens the booking sheet. The crossing needs two days to check against the footsteps. The dance can be mixed in one. On the night of day 7 Wai-lam has to return the bench key. Type calendar to see the last start for each job."
+            },
+            "chime": {
+              "name": "Hear the common room's victory chime",
+              "requires": ["relay-built"],
+              "result": "Wai-lam plays a clip from the Six Seats crew. Three spoons strike the sugar bowl. A fourth voice says, 'There's still sugar in that.' Wai-lam keeps the whole clip."
+            }
+          }
+        }
+      },
+      "actions": {
+        "air-turn": {
+          "name": "Edit and air the crossing",
+          "days": 2,
+          "window": [4, 7],
+          "cost": 600000000,
+          "consumes": {"turn-take": 1},
+          "gives": ["turn-on-air"],
+          "result": "The first noise pass erases the little drip that tells you where to turn. You keep that patch of rain and check the timing against Yan's footsteps the next day. Wai-lam threads the finished loop into the player. Out on the landing someone presses the button."
+        },
+        "air-ticket": {
+          "name": "Edit and air the last dance",
+          "window": [4, 7],
+          "cost": 900000000,
+          "consumes": {"ticket-take": 1},
+          "gives": ["ticket-on-air"],
+          "result": "You run a batch of mixes and listen for the one that keeps all three rhythms clear. The credit lines fit just before the loop turns over. Wai-lam threads the tape. On the landing, six knuckles tap the wall in time."
+        }
+      }
+    },
+    "hatch": {
+      "name": "Supper hatch",
+      "description": "A strip of glass above the counter reflects the soup pot. Someone at the back of the queue is standing on tiptoe to read the menu. Siu crosses out a dish in pencil. The correction is even smaller than the writing.",
+      "exits": ["press"],
+      "details": {
+        "tiles-up": "Siu turns the soup tile over with the back of her ladle. The person at the end of the queue nods."
+      },
+      "people": {
+        "siu": {
+          "name": "Siu",
+          "greeting": "'I can shout what's left or I can serve supper.' Siu sets a bowl on the counter. 'Can't manage both at once.'",
+          "topics": {
+            "slip": {
+              "name": "Take the marked supper slip",
+              "produces": {"supper-slip": 1},
+              "result": "Siu draws a bowl on one side of the slip and an empty pot on the other. She circles the price twice. 'Big enough to read from the door, please.' At the study desk, type queue to compare the two ways to proof the tiles."
+            }
+          }
+        }
+      },
+      "actions": {
+        "hang": {
+          "name": "Hang the reversible supper tiles",
+          "consumes": {"tile-proof": 1},
+          "gives": ["tiles-up"],
+          "result": "You print the proof on both faces of some stiff offcuts. Siu punches a hole above each dish and hangs the tiles on cup hooks. The macaroni soup runs out during your test. She turns one tile over and keeps ladling."
+        }
+      }
+    }
+  },
+  "endings": [
+    {
+      "id": "next-shift",
+      "title": "Someone else has the key",
+      "requires": ["stewards"],
+      "text": "On the eleventh morning you sleep through the first train. When you finally check your phone, there is a picture of a corrected map beside a freshly filed slip. The two new stewards have signed their names underneath. For once, nobody needs your password."
+    },
+    {
+      "id": "two-doorways",
+      "title": "Two sets of fingerprints",
+      "requires": ["map-up", "archive-open"],
+      "text": "A commuter follows the map as far as the print room. Through the open window she spots a ticket from a dance she went to years ago. Bo hands her a pencil. By lunchtime the back of the ticket has another name on it."
+    },
+    {
+      "id": "one-bowl",
+      "title": "One bowl left",
+      "requires": ["tiles-up"],
+      "text": "On the eleventh evening a student comes in with a half-finished assignment under one arm. From the doorway she spots the last bowl of macaroni soup and holds up one finger. Siu turns the tile, fills the bowl and has time to ask how the assignment is going."
+    },
+    {
+      "id": "audible-turn",
+      "title": "Four steps to the left",
+      "requires": ["turn-on-air"],
+      "text": "The player runs on mains power. The morning after the grant ends, it still has enough rain in it for anyone who presses the button. You see a stranger at the chained gate pause, take four steps to the left and carry on under cover."
+    },
+    {
+      "id": "last-dance",
+      "title": "The fourth chair",
+      "requires": ["ticket-on-air"],
+      "text": "Someone has left a pencilled note by the button. 'My dad used to drum that on the table.' Underneath, in Bo's handwriting, are the print room's opening hours. Through the window you can see her pulling out a chair."
+    },
+    {
+      "id": "rain-map",
+      "title": "The first dry page",
+      "requires": ["map-up"],
+      "text": "It rains before the first lecture. From the landing you watch a line of umbrellas turn left exactly where Yan said they would. Someone reaches the door, opens a sketchbook and begins to draw on a perfectly dry page."
+    },
+    {
+      "id": "reading-drawer",
+      "title": "A name in the margin",
+      "requires": ["archive-open"],
+      "text": "Bo finds a visitor turning a dance ticket over and over. 'My sister did the lettering,' he says. He takes the pencil on its string and adds a tiny credit in the margin. The drawer slides shut on one more piece of the story."
+    },
+    {
+      "id": "six-seats",
+      "title": "One more round",
+      "requires": ["relay-built"],
+      "text": "You come back for your charging cable. Six chairs are already drawn up and someone is explaining the rules to a newcomer. The sugar bowl has acquired a cardboard plinth. You sit on the arm of the sofa and wait for your turn."
+    },
+    {
+      "id": "envelope",
+      "title": "The back of the envelope",
+      "text": "The grant closes with the small click of an office stamp. On the back of the envelope, you write down one thing you still want to make. There is just enough room for a first sketch. You borrow Yan's pencil."
+    }
+  ]
+}

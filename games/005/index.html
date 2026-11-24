@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7f1">
+  <meta name="description" content="An interactive 3D field study of the suspended block inside an instant-noodle cup.">
+  <link rel="icon" href="data:,">
+  <title>Inside the noodle cup · Object Atlas</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="js/math.js"></script>
+  <script defer src="js/meshes.js"></script>
+  <script defer src="js/packing.js"></script>
+  <script defer src="js/design.js"></script>
+  <script defer src="js/strands.js"></script>
+  <script defer src="js/slices.js"></script>
+  <script defer src="js/lesson.js"></script>
+  <script defer src="js/observations.js"></script>
+  <script defer src="js/renderer.js"></script>
+  <script defer src="js/drawing.js"></script>
+  <script defer src="js/bench-views.js"></script>
+  <script defer src="js/diagram.js"></script>
+  <script defer src="js/callouts.js"></script>
+  <script defer src="js/checks.js"></script>
+  <script defer src="js/bench.js"></script>
+  <script defer src="js/lesson-tools.js"></script>
+  <script defer src="js/playback-controls.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon-library" aria-hidden="true">
+    <defs>
+      <symbol id="i-atlas" viewBox="0 0 32 32"><path d="m5 11 11-6 11 6-11 6zM5 16l11 6 11-6M5 21l11 6 11-6"/></symbol>
+      <symbol id="i-keys" viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M6 10h.5m3 0h.5m3 0h.5m3 0h.5M6 13.5h.5m3 0h7"/></symbol>
+      <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M6.5 16.6c-2.3-.8-3.7-2-3.7-3.5 0-2.6 4.1-4.7 9.2-4.7s9.2 2.1 9.2 4.7-4.1 4.7-9.2 4.7H9.5m2.3-2.4-2.6 2.5 2.6 2.1"/><path d="m8.2 6 3.8-2 3.8 2v4.8l-3.8 2-3.8-2z"/></symbol>
+      <symbol id="i-mouse" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="5.4"/><path d="M12 6v4"/></symbol>
+      <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 9a8 8 0 1 1-.1 6.1M4 4.5v5h5"/></symbol>
+      <symbol id="i-section" viewBox="0 0 24 24"><path d="m3.5 5.5 2.7 14h11.6l2.7-14M2.5 4.5h19M6 11.4h12M6.6 14h10.8"/><path d="m8.4 11.5 1.7 2.2m2-2.2 1.7 2.2m2-2.2 1.2 1.6"/></symbol>
+      <symbol id="i-fit" viewBox="0 0 24 24"><path d="m5.3 4.5 2.1 15.3h9.2l2.1-15.3M1.5 11.8h7m-2.7-2.5 2.7 2.5-2.7 2.5m16.7-2.5h-7m2.7-2.5-2.7 2.5 2.7 2.5"/></symbol>
+      <symbol id="i-transit" viewBox="0 0 24 24"><path d="m6 8 2 11.5h9L19 8M5 7h15M3 3.5h5m-6 7.2h2m-1 4h2M9 12h7"/></symbol>
+      <symbol id="i-pour" viewBox="0 0 24 24"><path d="M12.1 2.5C10 6.1 5.6 11 5.6 14.5a6.4 6.4 0 0 0 12.8 0c0-3.5-4.2-8.4-6.3-12zM8.5 14.6c0 2 1.4 3.5 3.4 3.8"/></symbol>
+      <symbol id="i-steam" viewBox="0 0 24 24"><path d="M3 13.5h18c-.5 4.2-3.7 7-9 7s-8.4-2.8-9-7zm6.2 8h5.6M7.1 10c-2.2-3.1 2.3-3.6.4-6.5M12 10c-2.2-3.1 2.3-4.1.4-7.2M17 10c-2.2-3.1 2.3-3.6.4-6.5"/></symbol>
+      <symbol id="i-slice" viewBox="0 0 24 24"><path d="M4 5.5 12 2l8 3.5v11L12 21l-8-4.5zM4 5.5 12 10m0 11V10l8-4.5M8 7.7l8-4"/></symbol>
+      <symbol id="i-cube" viewBox="0 0 24 24"><path d="m3.5 7 8.5-4.5L20.5 7v10L12 21.5 3.5 17zM3.5 7l8.5 4.5L20.5 7M12 11.5v10"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M7 4.8a1 1 0 0 1 1.5-.8l12 7.2a1 1 0 0 1 0 1.6l-12 7.2A1 1 0 0 1 7 19.2z"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M6 4.5h4.5v15H6zm7.5 0H18v15h-4.5z"/></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24"><path d="m14.5 5.8-6.2 6.2 6.2 6.2"/></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path d="m9.5 5.8 6.2 6.2-6.2 6.2"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M19.2 10.1c0 5-7.2 11.2-7.2 11.2S4.8 15 4.8 10.1a7.2 7.2 0 1 1 14.4 0z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+      <symbol id="i-caliper" viewBox="0 0 24 24"><path d="M3 5v11h17M7 8v5H3m10-4v7m4-5v5m3-7v7M3 19v2m0-1h10m0-1v2"/></symbol>
+      <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V4h4m8 0h4v4m0 8v4h-4M8 20H4v-4m-2-4h20"/><ellipse cx="12" cy="12" rx="6" ry="3.5"/></symbol>
+      <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M4 12V9a3 3 0 0 1 3-3h12m-3-3 3 3-3 3m4 3v3a3 3 0 0 1-3 3H5m3 3-3-3 3-3"/></symbol>
+      <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 3v17h17M7 8l4 3 4 1 5 4"/><circle cx="11" cy="11" r="1.5"/><circle cx="20" cy="16" r="1.5"/></symbol>
+      <symbol id="i-force" viewBox="0 0 24 24"><path d="m2 6 3 14h14l3-14M12 3v9m-3-3 3 3 3-3M4 16l5-2m-3-1 3 1-1 3m12-1-5-2m1 3-1-3 3-1"/></symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24"><path d="M3 12h4m10 0h4m-9-6 5 6-5 6-5-6z"/></symbol>
+    </defs>
+  </svg>
+  <header class="masthead"><div class="page mast-inner">
+    <div class="brand"><span class="brand-mark"><svg class="icon"><use href="#i-atlas"/></svg></span><span>Object Atlas</span></div>
+    <span class="brand-description">An interactive field guide</span>
+    <button id="help-open" class="help-button" aria-haspopup="dialog"><svg class="icon"><use href="#i-keys"/></svg>Controls</button>
+  </div></header>
+  <main class="page">
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow"><span class="orange-rule"></span>Food engineering</div>
+      <h1 id="page-title">Inside the noodle cup<span>.</span></h1>
+      <div class="intro-tools">
+        <p>Why is the noodle block suspended in the middle? Follow it from the packing line to the first pour.</p>
+        <div class="mode-switch" role="group" aria-label="Study mode">
+          <button type="button" id="mode-lesson" aria-controls="lesson-panel" aria-pressed="true"><svg class="icon"><use href="#i-section"/></svg>Guided lesson</button>
+          <button type="button" id="mode-packing" aria-controls="packing-panel" aria-pressed="false"><svg class="icon"><use href="#i-caliper"/></svg>Packing bench</button>
+        </div>
+      </div>
+    </section>
+    <div class="workspace">
+      <section class="stage" id="stage" aria-label="Interactive noodle cup model">
+        <canvas id="scene" tabindex="0" aria-label="Three-dimensional cup. Drag to orbit, scroll to zoom, or use the keyboard controls."></canvas>
+        <svg id="callouts" aria-hidden="true"></svg>
+        <div class="stage-header">
+          <div id="orientation" class="orientation">Front view</div>
+          <div class="view-switch" role="group" aria-label="Model view">
+            <button id="cutaway" class="view-button" aria-pressed="true"><svg class="icon"><use href="#i-slice"/></svg>Cutaway</button>
+            <button id="exterior" class="view-button" aria-pressed="false"><svg class="icon"><use href="#i-cube"/></svg>Exterior</button>
+          </div>
+        </div>
+        <div class="stage-footer">
+          <div class="gesture-help"><svg class="icon"><use href="#i-rotate"/></svg><span>Drag to orbit</span><i></i><span class="zoom-hint">Scroll to zoom</span></div>
+          <button class="reset-button" id="reset" title="Reset camera (R)" aria-label="Reset camera"><svg class="icon"><use href="#i-reset"/></svg></button>
+        </div>
+        <div id="model-error" class="model-error" hidden>
+          <div role="status"><h2>3D view unavailable</h2><p id="error-detail">WebGL could not start. You can still use the lesson and the packing bench.</p></div>
+          <div id="fallback-section" class="inset"><p id="fallback-reading" hidden></p></div>
+        </div>
+      </section>
+      <section class="notes" id="lesson-panel" aria-label="Current lesson step">
+        <div class="step-meta"><span id="step-label">Step 01 / 05</span><div class="step-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div id="caption-region" aria-live="polite" aria-atomic="true">
+          <h2 id="step-title">A deliberate gap</h2>
+          <p id="step-caption">The dry noodle block sits partway up the cup. Look beneath it and you’ll find a pocket of air between the noodles and the base.</p>
+        </div>
+        <figure id="lesson-inset" class="inset">
+          <canvas id="diagram" role="img" aria-label="Cup cross section showing the noodle block and the air gap below it."></canvas>
+          <p id="lesson-reading" class="section-reading" aria-hidden="true" hidden></p>
+        </figure>
+        <div class="step-experiments">
+          <button type="button" id="step-investigate" class="investigate"><span id="investigate-text">Scan the air gap</span><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+          <button type="button" id="try-press" class="investigate" hidden>Test a floor push<svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+          <button type="button" id="try-walls" class="investigate" hidden>Try straight sides<svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+          <button type="button" id="try-forces" class="investigate" hidden>See the support forces<svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+        </div>
+        <div class="water-tools" id="water-tools" hidden>
+          <div class="water-actions">
+            <button id="trace" type="button" aria-pressed="false" title="Colour noodle strands by immersion (T)"><svg class="icon"><use href="#i-pour"/></svg>Trace immersion</button>
+            <div class="water-stops" role="group" aria-label="Pause at a waterline">
+              <span>Pause at</span>
+              <button id="water-bottom" type="button" aria-label="Pause when the pool reaches the underside" title="First contact with the underside">Underside</button>
+              <button id="water-half" type="button" title="Pause when half the total strand length is under water">Half length</button>
+              <button id="water-top" type="button" aria-label="Pause when the pool reaches the top of the block" title="The highest curl meets the waterline">Top</button>
+            </div>
+          </div>
+          <p class="trace-legend" id="trace-legend" hidden><span>Above water</span><span>Submerged</span></p>
+          <div class="immersion-reading" id="immersion-reading" hidden>
+            <label for="immersion-meter">Strand length below water</label><span id="immersion-value">0%</span>
+            <meter id="immersion-meter" min="0" max="100" value="0" aria-describedby="immersion-note"></meter>
+            <p id="immersion-note">Measured along the centre of each curl.</p>
+          </div>
+        </div>
+        <div class="strand-tools" id="strand-tools" hidden>
+          <label for="strand-choice">Inspect the steep</label>
+          <select id="strand-choice"><option value="" selected>Off</option><option value="gap">Original air gap</option><option value="lower">Lower coil</option><option value="middle">Middle coil</option><option value="crown">Crown strand</option></select>
+          <div id="strand-inspection" hidden>
+            <p id="strand-reading"></p>
+            <p id="gap-key" hidden><i aria-hidden="true"></i>Hatching marks curls below the packed underside.</p>
+            <div class="instrument-stops"><button id="strand-packed" type="button">Packed pose</button><button id="gap-half" type="button" hidden>Half the gap</button><button id="strand-loose" type="button">Loosened pose</button></div>
+          </div>
+        </div>
+        <div class="lesson-controls">
+          <div class="time-row"><span>Lesson progress</span><span class="time"><b id="elapsed">0:00</b><span class="time-divider"> / </span><span id="duration">0:45</span></span></div>
+          <div class="timeline-track">
+            <input id="scrubber" class="scrubber" type="range" min="0" max="45" step="0.05" value="0" aria-label="Lesson playhead" aria-valuetext="0:00 of 0:45">
+            <div class="stop-rail" aria-hidden="true"><i id="observation-mark" hidden></i></div>
+          </div>
+          <div class="transport"><button id="play" class="play-button"><svg class="icon"><use id="play-icon" href="#i-play"/></svg><span id="play-text">Play lesson</span></button>
+            <button id="previous" class="step-button" title="Previous step (left arrow)" aria-label="Previous step" disabled><svg class="icon"><use href="#i-left"/></svg></button>
+            <button id="next" class="step-button" title="Next step (right arrow)" aria-label="Next step"><svg class="icon"><use href="#i-right"/></svg></button>
+          </div>
+          <div class="study-playback">
+            <label for="speed">Speed <select id="speed"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+            <button type="button" id="repeat" aria-pressed="false" title="Repeat the current step (L)"><svg class="icon" aria-hidden="true"><use href="#i-repeat"/></svg>Repeat step</button>
+            <button type="button" id="observe" aria-controls="observation" aria-pressed="false" title="Pause at one observation per chapter (O)"><svg class="icon" aria-hidden="true"><use href="#i-stop"/></svg>Observation stops</button>
+          </div>
+          <div class="observation" id="observation" hidden>
+            <div class="observation-heading"><span id="stop-time"></span><strong id="stop-title"></strong><button type="button" id="visit-stop">Go to stop</button></div>
+            <p id="stop-note" role="status"></p>
+          </div>
+        </div>
+      </section>
+      <section class="notes packing-panel" id="packing-panel" aria-labelledby="packing-title" hidden>
+        <div class="bench-scale"><svg class="icon"><use href="#i-caliper"/></svg>Model cup depth · 100 mm</div>
+        <div class="bench-instruments" role="group" aria-label="Packing bench instrument">
+          <button type="button" id="tool-fit" aria-pressed="true" aria-controls="fit-controls"><svg class="icon" aria-hidden="true"><use href="#i-fit"/></svg>Fit</button>
+          <button type="button" id="tool-forces" aria-pressed="false" aria-controls="forces-controls"><svg class="icon" aria-hidden="true"><use href="#i-force"/></svg>Support forces</button>
+          <button type="button" id="tool-scan" aria-pressed="false" aria-controls="scan-controls"><svg class="icon" aria-hidden="true"><use href="#i-scan"/></svg>Slice scanner</button>
+          <button type="button" id="tool-pour" aria-pressed="false" aria-controls="pour-controls"><svg class="icon" aria-hidden="true"><use href="#i-pour"/></svg>Metered pour</button>
+          <button type="button" id="tool-press" aria-pressed="false" aria-controls="press-controls"><svg class="icon" aria-hidden="true"><use href="#i-transit"/></svg>Transit test</button>
+          <button type="button" id="tool-finder" aria-pressed="false" aria-controls="finder-controls"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>Fit finder</button>
+        </div>
+        <h2 id="packing-title">Where will it catch?</h2>
+        <p class="bench-copy" id="bench-copy">Slide a different-sized block into the same cup. Watch where its weight comes to rest.</p>
+        <div class="bench-input">
+          <label for="diameter">Dry block diameter</label><output id="diameter-value" for="diameter">88 mm</output>
+          <input id="diameter" type="range" min="72" max="94" step="1" value="88" aria-label="Dry block diameter in millimetres">
+          <div class="range-ends" aria-hidden="true"><span>72 mm</span><span>94 mm</span></div>
+        </div>
+        <div class="bench-input cup-shape">
+          <label for="taper">Wall angle from vertical</label><output id="taper-value" for="taper">8.8°</output>
+          <input id="taper" type="range" min="0" max="100" step="5" value="100" aria-describedby="taper-ends">
+          <div id="taper-ends" class="range-ends"><span>Straight sides</span><span>Lesson cup</span></div>
+        </div>
+        <div id="fit-controls">
+          <button type="button" id="wall-map" aria-pressed="false" aria-controls="bench-diagram">Map wall clearance</button>
+        </div>
+        <div id="forces-controls" class="instrument-controls force-controls" hidden>
+          <label for="block-mass">Test block mass</label><output id="mass-value" for="block-mass">80 g</output>
+          <input id="block-mass" type="range" min="20" max="100" step="5" value="80">
+          <div class="force-key"><span>Weight</span><span>Support</span><small>Arrows show direction</small></div>
+        </div>
+        <div id="scan-controls" class="instrument-controls" hidden>
+          <label for="scan-height">Height above floor</label><output id="scan-value" for="scan-height">50 mm</output>
+          <input id="scan-height" type="range" min="0" max="100" step="1" value="50">
+          <div class="instrument-stops"><button id="scan-gap" type="button">Mid-gap</button><button id="scan-block" type="button">Mid-block</button></div>
+        </div>
+        <div id="pour-controls" class="instrument-controls pour-controls" hidden>
+          <label for="dose">Water added</label><output id="dose-value" for="dose">50 mL</output>
+          <input id="dose" type="range" min="0" max="1" step="1" value="0">
+          <div class="instrument-stops"><button id="pour-empty" type="button">Empty</button><button id="pour-full" type="button">Fill to underside</button></div>
+        </div>
+        <div id="press-controls" class="instrument-controls press-controls" hidden>
+          <label for="press-travel">Test pad travel</label><output id="press-value" for="press-travel">6.0 mm</output>
+          <input id="press-travel" type="range" min="0" max="8" step="0.1" value="6">
+          <div class="instrument-stops"><button id="press-rest" type="button">Release</button><button id="press-touch" type="button">First touch</button><button id="press-peak" type="button">Full push</button></div>
+        </div>
+        <div id="finder-controls" class="instrument-controls finder-controls" hidden>
+          <label for="pocket-goal">Pocket must hold at least</label><output id="pocket-goal-value" for="pocket-goal">100 mL</output>
+          <input id="pocket-goal" type="range" min="0" max="250" step="5" value="100">
+          <label for="room-goal">Leave above the block</label><output id="room-goal-value" for="room-goal">30 mm</output>
+          <input id="room-goal" type="range" min="0" max="100" step="1" value="30">
+          <div class="finder-match"><span id="fit-matches" role="status"></span><button id="apply-fit" type="button">Use smallest match</button></div>
+        </div>
+        <figure id="bench-inset" class="inset bench-inset">
+          <canvas id="bench-diagram" role="img" aria-label="Cross section of the test block in the model cup."></canvas>
+          <p id="bench-reading" class="section-reading" aria-hidden="true" hidden></p>
+        </figure>
+        <dl class="bench-readings">
+          <div><dt id="reading-one">Clearance below</dt><dd id="bench-gap"></dd></div>
+          <div><dt id="reading-two">Supported by</dt><dd id="bench-support"></dd></div>
+        </dl>
+        <p class="bench-result" id="bench-result" aria-live="polite"></p>
+      </section>
+    </div>
+    <nav class="sequence" aria-label="Lesson sequence">
+      <div class="sequence-heading"><h2>Lesson sequence</h2><span>5 steps</span></div>
+      <ol id="chapters"></ol>
+    </nav>
+    <section class="field-checks" aria-labelledby="checks-title">
+      <div class="checks-heading"><h2 id="checks-title">Check your understanding</h2><span id="check-count">0 of 3 correct</span></div>
+      <div class="check-topics" id="check-topics" role="group" aria-label="Choose a question"></div>
+      <h3 id="check-question"></h3>
+      <div class="check-options" id="check-options" role="group" aria-labelledby="check-question"></div>
+      <p class="check-feedback" id="check-feedback" role="status"></p>
+      <div class="check-actions">
+        <button id="check-evidence" type="button" hidden>Inspect the model</button>
+        <button id="check-next" type="button" hidden>Next question</button>
+        <button id="check-restart" type="button" hidden>Try all three again</button>
+      </div>
+    </section>
+    <footer class="page-footer"><span><svg class="icon"><use href="#i-pin"/></svg>HKBU field notes · Kowloon Tong</span><span class="key-hint"><kbd>←</kbd><kbd>→</kbd> Change step</span></footer>
+  </main>
+  <dialog id="help" aria-labelledby="help-title">
+    <div class="dialog-heading"><span class="eyebrow">Field guide</span><button id="help-close" class="reset-button" aria-label="Close controls"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <h2 id="help-title">Explore the model</h2>
+    <dl class="help-list">
+      <div><dt>Orbit the cup</dt><dd>Drag or <kbd>A</kbd> <kbd>D</kbd> <kbd>W</kbd> <kbd>S</kbd></dd></div>
+      <div><dt>Zoom</dt><dd>Scroll, pinch, or <kbd>−</kbd> <kbd>+</kbd></dd></div>
+      <div><dt>Play or pause</dt><dd><kbd>Space</kbd></dd></div>
+      <div><dt>Slow or speed up playback</dt><dd>Speed menu, ¼× to 2×</dd></div>
+      <div><dt>Repeat the current step</dt><dd>Repeat step or <kbd>L</kbd></dd></div>
+      <div><dt>Pause at each observation</dt><dd>Observation stops or <kbd>O</kbd>. Use Go to stop to inspect the current chapter’s moment.</dd></div>
+      <div><dt>Change step</dt><dd><kbd>←</kbd> <kbd>→</kbd> or <kbd>1</kbd>–<kbd>5</kbd></dd></div>
+      <div><dt>Switch model view</dt><dd><kbd>C</kbd></dd></div>
+      <div><dt>Enter or leave the packing bench</dt><dd><kbd>B</kbd></dd></div>
+      <div><dt>Size the test block</dt><dd>Diameter slider, then <kbd>←</kbd> <kbd>→</kbd></dd></div>
+      <div><dt>Reshape the test cup</dt><dd>Move the wall-angle slider. The rim stays the same width.</dd></div>
+      <div><dt>Locate close-fitting curls</dt><dd>Fit → Map wall clearance</dd></div>
+      <div><dt>See what carries the weight</dt><dd>Support forces → adjust mass, diameter or wall angle</dd></div>
+      <div><dt>Find a diameter for two targets</dt><dd>Fit finder → set the pocket and headroom → Use smallest match</dd></div>
+      <div><dt>Read a horizontal slice</dt><dd>Slice scanner, then move the height slider</dd></div>
+      <div><dt>Measure the lower pocket</dt><dd>Metered pour, then add water in mL</dd></div>
+      <div><dt>Compare a push from below</dt><dd>Transit test, then move the pad or change the block diameter</dd></div>
+      <div><dt>Trace immersion in steps 4–5</dt><dd><kbd>T</kbd></dd></div>
+      <div><dt>Freeze a waterline</dt><dd>Underside, Half length or Top</dd></div>
+      <div><dt>Measure the steep in step 5</dt><dd>Inspect the steep → Original air gap. Choose Half the gap to freeze the first crossing.</dd></div>
+      <div><dt>Track a curl in step 5</dt><dd>Choose a strand under Inspect the steep, then scrub or compare the two poses.</dd></div>
+      <div><dt>Reset camera</dt><dd><kbd>R</kbd></dd></div>
+      <div><dt>Open controls</dt><dd><kbd>?</kbd></dd></div>
+      <div><dt>Close controls</dt><dd><kbd>Esc</kbd></dd></div>
+    </dl>
+    <p class="help-note">The bench holds your place in the lesson. After a field question, use its evidence button to inspect the cup.</p>
+  </dialog>
+  <noscript><div class="no-script">Enable JavaScript to run the interactive WebGL lesson.</div></noscript>
+</body>
+</html>
